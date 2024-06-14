@@ -151,6 +151,8 @@ def plot_behavior_terminal(exp_dir, task_id):
     trial_data_file = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
     print(trial_data_file)
     trial_data_header = load_trial_header(task_id)
+    df=pd.read_csv(trial_data_file)
+    print(df)
     print(trial_data_header)
     trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
     print(trial_data_file)
