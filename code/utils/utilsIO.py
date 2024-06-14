@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 from shutil import copyfile
 import pandas as pd
-from utils import check_dir, get_today
+from .utils import check_dir, get_today
 
 def load_droid_setting():
     """
