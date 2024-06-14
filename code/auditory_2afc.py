@@ -54,12 +54,11 @@ from datetime import datetime
 from sklearn import preprocessing
 from utils.encoder import Encoder
 from utils.sync_pulse import Sync_Pulse
-from utils.utils import get_today, check_first_day, get_stage, make_exp_dir, check_dir, start_option, \
-    plot_behavior_terminal
-from utils.utils_audio import pitch_to_frequency, weighted_octave_choice, create_tone
-from utils.utilsIO import load_droid_setting, load_task_prefs, load_response_matrix, store_meta_data, store_pref_data,\
-    store_reaction_times, load_pump_calibration
-from utils.utils_2afc import check_stage_4_advance, check_ready_for_experiment, get_bias_correction
+from utils.utils import get_today, check_first_day, get_stage, make_exp_dir, check_dir, start_option, plot_behavior_terminal, \
+    pitch_to_frequency, weighted_octave_choice, create_tone, \
+    load_droid_setting, load_task_prefs, load_response_matrix, store_meta_data, store_pref_data,\
+        store_reaction_times, load_pump_calibration, \
+    check_stage_4_advance, check_ready_for_experiment, get_bias_correction
 
 ##
 
