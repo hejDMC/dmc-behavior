@@ -8,7 +8,7 @@ import os
 import random
 import json
 
-from utils import check_dir
+from .utils import check_dir
 
 
 # get the animal id
