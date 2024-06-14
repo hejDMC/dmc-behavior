@@ -14,7 +14,7 @@ import json
 from shutil import copyfile
 import random
 import numpy as np
-from psychofit import mle_fit_psycho, weibull, weibull50, erf_psycho, erf_psycho_2gammas
+from .psychofit import mle_fit_psycho, weibull, weibull50, erf_psycho, erf_psycho_2gammas
 # from utils.utilsIO import load_meta_data, load_pump_calibration
 
 
