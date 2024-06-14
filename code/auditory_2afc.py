@@ -417,8 +417,7 @@ class Auditory2AFC(threading.Thread):
         return tone_cloud
     #
     def play_tone(self, tone, duration, amplitude):
-        #
-        audio = self.create_tone(int(tone), duration, amplitude)
+        audio = create_tone(self.fs, int(tone), duration, amplitude)
         # print(str(tone))
         sd.play(audio, self.fs, blocking=True)
     #
