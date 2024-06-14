@@ -47,7 +47,7 @@ class Habituation(threading.Thread):
 
         # load pref files
         self.droid_settings = load_droid_setting() # general paramters (e.g. pin layout map and sampling rates used)
-        self.task_prefs = load_task_prefs('habituation_auditory_tasks_prefs') # task specifics (e.g. tones used and their duration)
+        self.task_prefs = load_task_prefs('habituation_auditory_tasks') # task specifics (e.g. tones used and their duration)
 
         # set task parameters
         self.l_oct = self.task_prefs['task_prefs']['low_octave']  # low octave in pitch (start pitch, end pitch, num_pitch)
