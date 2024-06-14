@@ -152,6 +152,7 @@ def plot_behavior_terminal(exp_dir, task_id):
     trial_data_header = load_trial_header(task_id)
     trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
     trial_times = trial_data[trial_data['trial_start'] == 1].reset_index()
+    print(trial_times)
     # correct choices
     c = trial_times['choice'].copy()
     c[c != 'correct'] = 0
@@ -169,7 +170,9 @@ def plot_behavior_terminal(exp_dir, task_id):
     o_mean = o.rolling(10).mean().fillna(0)
 
     t_size = os.get_terminal_size().columns  # size of terminal to adjust for plotting
+    print(t_size)
     scale_factor = math.ceil(len(c_mean) / t_size)
+    print(scale_factor)
     plot_series = [c_mean[::scale_factor].to_list(), i_mean[::scale_factor].to_list(), o_mean[::scale_factor].to_list()]  # only plot every nth value, depending on terminal size, to avoid that plotting is messed up by breaking on columns
     config = {'height': 10, 'format': '{:8.0f}', 'colors': [acp.green, acp.red, acp.lightgray]}  # correct is green, incorrect is red, omission gray
     print(acp.plot(series=plot_series, cfg=config))
