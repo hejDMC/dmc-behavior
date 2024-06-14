@@ -81,6 +81,27 @@ Enter 'start' to begin: start
 ```
 data/<animal_id>/<YYYYMMDD>/<HHMMSS>
 ```
+- the general structure of data storage is the following:
+```
+data
+│
+└───animal_id-1
+│   │
+│   └───date_of_experiment-(YYYYMMDD)
+│       │
+│       └───individual_experiment-1-(HHMMSS)
+│           │   meta-data.json
+│           │   droid_prefs.json
+│           │   task_prefs.json
+│           │   rotary_data.csv
+│           │   trial_data.csv
+│           │   ...
+│   
+└───animal_id-2
+    │   ...
+```
+- the `meta-data.json` provides general info on the current sessions (including central parameters like the tones used as well as on the duration of the session etc.). The `droid_prefs.json` file provides info on the pin mapping etc. and is just copied here for completeness (the file is more used by the experimental scripts to read out central parameters like sampling rates and pin mapping). The `task_prefs.json` file contains the task specific parameters (e.g. ITI, response window etc.) that were used for the present task (these differ e.g. between experimental stages). The `.csv` files contain the actual behavioral data that are used to reconstruct to the animals' performance later on. Which files are present depends on the task used (e.g. no rotary data during habituation as the wheel is fixed) or if e.g. 2P imaging was performed (no 2P sync data otherwise). The `trial_data.csv` contains the most detailed, timestamped information on what was done when.  
+
 
 ### Data transfer
 - all behavioral data is locally stored on the SSD of the Raspberry Pi, for transferring data it is highly recommended to use a FTP client (e.g. [FileZilla](https://filezilla-project.org))
