@@ -626,13 +626,13 @@ def get_bias_correction(animal_dir, first_day):
     print("bias correction:" + str(bias_correction))
     return bias_correction
 
-def load_response_matrix(animal_dir):
-    animal_id = animal_dir.parts[-1]
-    response_matrix_fn = animal_dir.joinpath(animal_id + '_response_matrix.json')
-    with open(response_matrix_fn) as fn:
-        response_matrix = json.load(fn)
-
-    return response_matrix
+# def load_response_matrix(animal_dir):
+#     animal_id = animal_dir.parts[-1]
+#     response_matrix_fn = animal_dir.joinpath(animal_id + '_response_matrix.json')
+#     with open(response_matrix_fn) as fn:
+#         response_matrix = json.load(fn)
+#
+#     return response_matrix
 
 def get_right_trials(response_matrix, c_rm=False):
     curr_rm = response_matrix['pre_reversal']  # todo, so far no reversal
@@ -735,7 +735,8 @@ def check_stage_4_advance(animal_dir):
         - > 90 % on *both* 100 % trials, respectively
         - fit of joint psychometric curve with pars[0] < 5, pars[1] < 20 (??), pars[2]/[3] < 0.1
     """
-    response_matrix = load_response_matrix(animal_dir)
+    animal_id = animal_dir.parts[-1]
+    response_matrix = load_response_matrix(animal_id)
     stim_list = [0, 15, 30, 40, 60, 70, 85, 100]
     p_model = 'erf_psycho_2gammas'
     dispatcher = {
@@ -792,7 +793,8 @@ def check_ready_for_experiment(animal_dir):
         - fit of joint psychometric curve with for both blocks: pars[2]/[3] < 0.1
         - bias shift: pars[0] diff between blocks > 5 ???
     """
-    response_matrix = load_response_matrix(animal_dir)
+    animal_id = animal_dir.parts[-1]
+    response_matrix = load_response_matrix(animal_id)
     stim_list = [0, 15, 30, 40, 60, 70, 85, 100]
     p_model = 'erf_psycho_2gammas'
     dispatcher = {
