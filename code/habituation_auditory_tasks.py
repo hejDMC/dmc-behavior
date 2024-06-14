@@ -190,7 +190,7 @@ class Habituation(threading.Thread):
         self.data_logger()
         self.trial_start = 0
         self.cloud = self.create_tone_cloud(self.tgt_octave, self.stim_strength)
-        self.timeout = time.time() + self.pump_time_after_audio
+        self.timeout = time.time() + self.pump_time_after_audio + self.cloud_duration
         with sd.OutputStream(samplerate=self.fs, blocksize=len(self.cloud), channels=2, dtype='int16',
                              latency='low', callback=self.callback):
             while True:
