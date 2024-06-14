@@ -1,4 +1,4 @@
-# DMC-Behavior Platform for auditory behavioral tasks in head-fixed mice
+# *DMC-Behavior Platform* for auditory behavioral tasks in head-fixed mice
 ## Assembly of behavioral setups, software installation and operation
 ### Hardware assembly
 *see installation guide: `.docs/DMC-Behavior-Platform_Hardware-assembly.md`*
