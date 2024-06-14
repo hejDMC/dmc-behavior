@@ -1,0 +1,15 @@
+{
+  "task_prefs": {
+        "low_octave": [36, 47, 12],
+        "middle_octave": [48, 59, 12],
+        "high_octave": [60, 71, 12],
+        "cloud_range": [-32767, 32767],
+        "tone_duration": 0.03,
+        "tone_fs": 100,
+        "cloud_duration": 2.04,
+        "pump_time_after_audio": 1,
+        "tone_amplitude": 1,
+        "reward_size_2afc": 3,
+        "reward_size_gonogo": 5
+  }
+}
