@@ -11,8 +11,8 @@ from pathlib import Path
 import socket
 import time
 import json
-from utils import get_today
-from utilsIO import load_droid_setting
+from utils import get_today, load_droid_setting
+# from utilsIO import load_droid_setting
 
 # get droid name
 droid = socket.gethostname()
