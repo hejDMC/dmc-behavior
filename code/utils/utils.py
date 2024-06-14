@@ -133,7 +133,7 @@ def load_trial_header(task_id):
     :param task_id: str
     :return: trial_header: list
     """
-    if task_id == '2afc':
+    if '2afc' in task_id:
         trial_header = ["time", "trial_num", "trial_start", "trial_type", "stim_strength", "tone_onset",
                              "decision", "choice", "reward_time", "inter_trial_intervall", "block"]
     else:  # detection and gonogo
