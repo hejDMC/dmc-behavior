@@ -147,17 +147,11 @@ def plot_behavior_terminal(exp_dir, task_id):
     :param exp_dir: Path
     :param trial_data_header: list
     """
-    # animal_id = exp_dir.parts[-3]
     # load the trial data
     trial_data_file = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
     trial_data_header = load_trial_header(task_id)
-    print(trial_data_header)
-    # response_matrix = load_response_matrix(animal_id)
-    #trial_times = load_trial_data(exp_dir, task_id, response_matrix=response_matrix)
     trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
-    print(trial_data_file)
     trial_times = trial_data[trial_data['trial_start'] == 1].reset_index()
-    print(trial_times)
     # correct choices
     c = trial_times['choice'].copy()
     c[c != 'correct'] = 0

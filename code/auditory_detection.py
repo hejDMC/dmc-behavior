@@ -308,7 +308,7 @@ class AuditoryDetection(threading.Thread):
     #
     def play_tone(self, tone, duration, amplitude):
         #
-        audio = self.create_tone(int(tone), duration, amplitude)
+        audio = create_tone(self.tone_fs, int(tone), duration, amplitude)
         # print(str(tone))
         sd.play(audio, self.fs, blocking=True)
     #
