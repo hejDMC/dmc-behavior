@@ -199,6 +199,7 @@ class Habituation(threading.Thread):
                     self.trigger_reward()
                     break
 
+        self.cancel_audio = False
         self.curr_iti = random.uniform(self.iti[0], self.iti[1])
         time.sleep(self.curr_iti)  # inter-trial-interval
         self.data_logger()
