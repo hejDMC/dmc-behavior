@@ -147,11 +147,14 @@ def plot_behavior_terminal(exp_dir, task_id):
     :param exp_dir: Path
     :param trial_data_header: list
     """
+    animal_id = exp_dir.parts[-3]
     # load the trial data
     trial_data_file = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
-    trial_data_header = load_trial_header(task_id)
-    trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
-    trial_times = trial_data[trial_data['trial_start'] == 1].reset_index()
+    # trial_data_header = load_trial_header(task_id)
+    response_matrix = load_response_matrix(animal_id)
+    trial_times = load_trial_data(trial_data_file, task_id, response_matrix=response_matrix)
+    # trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
+    # trial_times = trial_data[trial_data['trial_start'] == 1].reset_index()
     print(trial_times)
     # correct choices
     c = trial_times['choice'].copy()
@@ -259,10 +262,10 @@ def load_response_matrix(animal_id, in_task=False):
         response_matrix = json.load(json_file)
 
     if pre_reversal:
-        print(">>>>>>>>   ANIMAL ON PRE-REVERSAL    <<<<<<<<<<<<")
+        # print(">>>>>>>>   ANIMAL ON PRE-REVERSAL    <<<<<<<<<<<<")
         response_matrix = response_matrix['pre_reversal']
     else:
-        print(">>>>>>>>   ANIMAL ON POST-REVERSAL    <<<<<<<<<<<<")
+        # print(">>>>>>>>   ANIMAL ON POST-REVERSAL    <<<<<<<<<<<<")
         response_matrix = response_matrix['post_reversal']
 
     return response_matrix, pre_reversal
