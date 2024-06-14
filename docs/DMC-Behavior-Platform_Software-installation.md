@@ -124,6 +124,16 @@ pip install -r docs/requirements.txt
 mkdir data
 ```
 
+## Perform pump calibration
+- *in general, it is recommended to perform a calibration of the pumps routinely*
+- pump calibration describes a procedure to estimate how much liquid reward is delivered are a given opening time of the pump
+- pump calibration needs to be performed before running any task, otherwise a default pump opening time is used
+- for pump calibration, pumps are opened for x ms repeated n times. the amount of liquid A needs to be collected and measured (e.g. using a scale or syringes), afterwards by dividing A/n, we calculate the amount of reward that is delivered for a pump opening time x. As an example, you open the pump for x=150 ms for n=100 times and collected an amount of liquid of A=300 ul, resulting in 300/100 = 3ul for a pump opening time of 150 ms. the pump calibration script will prompt you to enter the pump opening time for 1 ul, so enter `50` (=150 ms/ 3 ul). you can repeat the calibration procedure with other pump times to verify that the time of pump opening is linear to the amount of liquid distributed. **currently, the `dmc-behavior` platform assumes this linear relationship and does not work otherwise without adjusted the code**
+- to run the pump calibration enter:
+```
+python code/utils/pump_calibration.py
+```
+
 ## Create aliases for your behavioral paradigm (optional, recommended)
 ### Background
 - the scripts for running distinct behavioral paradigms (e.g. an auditory 2AFC task) are located in the `code` folder and run by a terminal command, e.g.:
