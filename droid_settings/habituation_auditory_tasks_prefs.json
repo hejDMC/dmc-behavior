@@ -7,7 +7,7 @@
         "tone_duration": 0.03,
         "tone_fs": 100,
         "cloud_duration": 0.51,
-        "pump_time_after_audio": 2,
+        "pump_time_after_audio": 3.06,
         "tone_amplitude": 1,
         "reward_size_2afc": 3,
         "reward_size_gonogo": 5

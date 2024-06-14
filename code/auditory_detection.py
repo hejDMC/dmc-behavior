@@ -1,19 +1,18 @@
 '''
-Auditory go/no-go task with tone clouds
+Auditory detection task with tone clouds
 
 
 Aim:
-    Animals are trained to perform an auditory (reversal) go/no-go task with tone clouds. Animals are randomly assigned
-    to one of two groups (either high or low tone clouds serves as go signal, this is changed after the reversal).
+    Animals are trained to perform an auditory detection task with tone clouds.
     Animals indicate responses by turning the wheel.
 
-    There are two types of correct trials:
-        - correct detection (wheel turn upon go cue) --> 10 % sucrose reward is given (3ul, maybe this will be reduced later on)
-        - correct rejection (no wheel turn upon no-go cue)
-    and two types of errors:
-        - false alarm (wheel turn upon no-go cue)
-        - omission (no wheel turn upon go cue)
-        --> in both cases a white noise is played, plus 1.5 sec timeout (i.e. increased ITI)
+    Correct trials (hits):
+        - wheel turns during response window after tone cloud onset to either direction
+        - 5 ul 10 % sucrose water is given as reward
+
+    Incorrect trials (misses):
+        - no wheel turns during response window after tone cloud onset
+        - increased ITI
 
     From Coen et al., 2021: the turning threshold for a decision was 30 degrees in wheel turning.
 
@@ -38,7 +37,7 @@ from utils.sync_pulse import Sync_Pulse
 from utils.utils import get_today, check_first_day, get_stage, make_exp_dir, check_dir, start_option, \
     plot_behavior_terminal, \
     pitch_to_frequency, weighted_octave_choice, create_tone, \
-    load_droid_setting, load_task_prefs, load_response_matrix, store_meta_data, store_pref_data,\
+    load_droid_setting, load_task_prefs, store_meta_data, store_pref_data,\
         store_reaction_times, load_pump_calibration
 
 ##

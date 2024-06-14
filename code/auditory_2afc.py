@@ -1,8 +1,5 @@
 '''
-Auditory two-alternative forced (?) choice task with tone clouds
-December 2022 - FJ
-
-Updated script from spring 2022
+Auditory two-alternative forced choice task with tone clouds
 
 Aim:
     Animals are trained to perform an auditory two-alternative forced choice task
@@ -19,22 +16,6 @@ Aim:
     non-target octaves (ratios are 85/15, 70/30 and 60/40).
 
     From Coen et al., 2021: the turning threshold for a decision was 30 degrees in wheel turning.
-
-    Training stages are:
-    Stage 0
-        --> **Aim** is to train animals that moving the wheel is important for obtaining reward,
-            ideally animals learn already that tones are important too (stim-response), but this feels a bit unlikely.
-        --> **Implementation:** Give 3 ul reward everytime wheel is moved in response window, irrespective of direction.
-            Wheel gain is adjusted, once the animal has performed more than 200 trials in one session, it is set to full
-            (before it's half, so we encourage more rigourus movement). The response window likewise decreases to double
-            the task response_window (in the very beginning it's 4x the duration)
-        --> **Criteria** to advance should reflect that animals understood that moving the wheel is *somehow* important.
-            Min. two days of training in that stage plus a minimum of 200 trials on two successive days.
-
-    Stage 1:
-        --> **Aim** is to train animals to learn the basic task structure of moving *either* left or right upon high/low tone cloud presentation.
-        --> **Implementation:** Give reward for correct trials and play white noise in omission/incorrect trials. Reward size is dynamically set between 3 ul and 1.5 ul (de-/increase by 0.1 depending on if 1 ml reward was consumed the previous session). Soft, motivational debiasing: Higher likelyhood of repeat trials, plus double reward size is anti-bias side.
-        --> **Criteria**
 
 '''
 

@@ -1,21 +1,10 @@
 '''
-Auditory two-alternative forced choice task (tones)
-Habituation script - for the days 2-4 after start of water restriction (day 1 is handling)
+Habituation script for head-fixed mice performing auditory tasks
 
 Aim:
     Habituate animals to setup and being head-fixed. Animals are head-fixed for increasing durations (day 1 = 15 min;
-    day 2 = 30 min; day = 45 min). During head-fixation, animals are presented the 'easy' tones and 5 ul reward (10%
+    day 2 = 30 min; day = 45 min). During head-fixation, animals are presented the 'easy' tones and X ul reward (10%
     sucrose) is provided. During habituation the wheel position is fixed.
-
-    Easy tones:
-        High:
-        Low:
-
-    todo:
-    Lengths of tones:
-    ITI:
-    Length of tone: 10 sec (2 sec SD) as in IBL task # todo less here, maybe 1 sec or 2?
-
 
 
 '''
@@ -36,9 +25,6 @@ from utils.utils import get_today, check_dir, make_exp_dir, \
     load_droid_setting, load_task_prefs, store_pref_data, store_meta_data, load_pump_calibration, \
     pitch_to_frequency, weighted_octave_choice, create_tone, \
     habi_time_limit, get_habi_task
-# from utils.utilsIO import load_droid_setting, load_task_prefs, store_pref_data, store_meta_data, load_pump_calibration
-# from utils.utils_audio import pitch_to_frequency, weighted_octave_choice, create_tone
-# from utils.utils_habituation import habi_time_limit, get_habi_task
 
 #%%
 class Habituation(threading.Thread):
@@ -79,6 +65,7 @@ class Habituation(threading.Thread):
         self.reward_size = self.task_prefs['task_prefs'][f'reward_size_{task_id}']  # reward size is ul
         self.pump_time = load_pump_calibration()  # pump time equaling delivery of 1 ul in ms
         self.pump_duration = self.reward_size * self.pump_time  # ms
+        GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
         self.pump = self.droid_settings['pin_map']['OUT']['pump']
         GPIO.setup(self.pump, GPIO.OUT)

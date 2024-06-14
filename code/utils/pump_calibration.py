@@ -3,6 +3,7 @@ Pump calibration: to estimate the amount of liquid dispensed by the pump per tim
 
 Enter the duration of pumping and the number of repeats
 Collect the amount dispensed and calculate the average
+Enter the duration for dispensing 1 ul liquid -- this will be used by the behavioral scripts
 
 """
 
@@ -12,7 +13,6 @@ import socket
 import time
 import json
 from utils import get_today, load_droid_setting
-# from utilsIO import load_droid_setting
 
 # get droid name
 droid = socket.gethostname()
@@ -27,6 +27,7 @@ number_repeats = int(input("enter the number of repeats:"))
 
 # open the pump for duration of x for the number of repeats n
 pin = pump_pin  # use GPIO number!!
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) # change to GPIO number
 GPIO.setup(pin, GPIO.OUT)
 GPIO.output(pin, GPIO.LOW) # pin low --> pump closed

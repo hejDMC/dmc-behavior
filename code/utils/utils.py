@@ -1,5 +1,5 @@
 """
-Helper functions for behavioral tasks
+Helper functions for dmc-behavior tasks
 
 FJ
 """
@@ -17,7 +17,7 @@ import numpy as np
 from .psychofit import mle_fit_psycho, weibull, weibull50, erf_psycho, erf_psycho_2gammas
 # from utils.utilsIO import load_meta_data, load_pump_calibration
 
-
+#%% general/random functions
 def check_dir(animal_id):
     """
     Function to check if directory for storing animal data exists, and create if it doesn't
@@ -149,15 +149,10 @@ def plot_behavior_terminal(exp_dir, task_id):
     """
     # load the trial data
     trial_data_file = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
-    print(trial_data_file)
     trial_data_header = load_trial_header(task_id)
     df=pd.read_csv(trial_data_file)
-    print(df)
-    print(trial_data_header)
     trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
-    print(trial_data_file)
     trial_times = trial_data[trial_data['trial_start'] == 1].reset_index()
-    print(trial_times)
     # correct choices
     c = trial_times['choice'].copy()
     c[c != 'correct'] = 0
@@ -175,9 +170,7 @@ def plot_behavior_terminal(exp_dir, task_id):
     o_mean = o.rolling(10).mean().fillna(0)
 
     t_size = os.get_terminal_size().columns  # size of terminal to adjust for plotting
-    print(t_size)
     scale_factor = math.ceil(len(c_mean) / t_size)
-    print(scale_factor)
     plot_series = [c_mean[::scale_factor].to_list(), i_mean[::scale_factor].to_list(), o_mean[::scale_factor].to_list()]  # only plot every nth value, depending on terminal size, to avoid that plotting is messed up by breaking on columns
     config = {'height': 10, 'format': '{:8.0f}', 'colors': [acp.green, acp.red, acp.lightgray]}  # correct is green, incorrect is red, omission gray
     print(acp.plot(series=plot_series, cfg=config))
@@ -195,10 +188,7 @@ def plot_behavior_terminal(exp_dir, task_id):
     amount_reward = pump_data['pump_duration'].sum() / pump_time
     print('Amount consumed total volume: ' + str(amount_reward))
 
-
-
-
-
+#%% I/O function for data etc.
 def load_droid_setting():
     """
     Dummy function to load droid settings
@@ -476,9 +466,7 @@ def store_meta_data(animal_id, droid, start_time, end_time, exp_dir, task_obj, s
     with open(file_path, "w") as outfile:
         json.dump(data_dict, outfile, indent=4)
 
-
-
-
+#%% utils for habituation
 
 def get_habi_task():
     p_r = input("2afc task (no assumes gonogo/detection)? y/n:")
@@ -520,10 +508,7 @@ def habi_time_limit():
 
     return habi_day, time_limit
 
-
-
-
-
+#%% function for auditory stuff
 
 def pitch_to_frequency(pitch):
     """
@@ -592,9 +577,7 @@ def create_tone(fs, frequency, tone_duration, amplitude):
     audio = audio.astype(np.int16)
     return audio
 
-
-
-
+#%% helpers for 2afc task
 
 def get_bias_correction(animal_dir, first_day):
     # load previous data and check if animal displayed a strong bias towards on side (> 70 % of non-omission trials towards one side)

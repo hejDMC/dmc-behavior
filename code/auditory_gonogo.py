@@ -1,5 +1,5 @@
 '''
-Auditory go/no-go task with tone clouds
+Auditory Go/NoGo task with tone clouds
 
 
 Aim:
@@ -8,12 +8,12 @@ Aim:
     Animals indicate responses by turning the wheel.
 
     There are two types of correct trials:
-        - correct detection (wheel turn upon go cue) --> 10 % sucrose reward is given (3ul, maybe this will be reduced later on)
+        - correct detection (wheel turn upon go cue) --> 5 ul 10 % sucrose reward is given
         - correct rejection (no wheel turn upon no-go cue)
     and two types of errors:
-        - false alarm (wheel turn upon no-go cue)
+        - false alarm (wheel turn upon no-go cue) --> white noise is played
         - omission (no wheel turn upon go cue)
-        --> in both cases a white noise is played, plus 1.5 sec timeout (i.e. increased ITI)
+        --> 1.5 sec timeout (i.e. increased ITI)
 
     From Coen et al., 2021: the turning threshold for a decision was 30 degrees in wheel turning.
 
