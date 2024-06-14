@@ -138,7 +138,7 @@ def load_trial_header(task_id):
                              "decision", "choice", "reward_time", "inter_trial_intervall", "block"]
     else:  # detection and gonogo
         trial_header = ["time", "trial_num", "trial_start", "trial_type", "tone_onset", "decision", "choice",
-                        "reward_time", "inter_trial_intervall"]
+                        "left_right", "reward_time", "inter_trial_intervall"]
     return trial_header
 
 def plot_behavior_terminal(exp_dir, task_id):
