@@ -33,7 +33,7 @@ import threading
 from datetime import datetime
 from sklearn import preprocessing
 from utils.utils import get_today, check_dir, make_exp_dir
-from utils.utils_IO import load_droid_setting, load_task_prefs, store_pref_data, store_meta_data, load_pump_calibration
+from utils.utilsIO import load_droid_setting, load_task_prefs, store_pref_data, store_meta_data, load_pump_calibration
 from utils.utils_audio import pitch_to_frequency, weighted_octave_choice, create_tone
 from utils.utils_habituation import habi_time_limit, get_habi_task
 

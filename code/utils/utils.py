@@ -10,7 +10,7 @@ from datetime import date, datetime
 import pandas as pd
 import asciichartpy as acp
 import math
-from utils_IO import load_meta_data, load_pump_calibration
+from utilsIO import load_meta_data, load_pump_calibration
 
 
 def check_dir(animal_id):

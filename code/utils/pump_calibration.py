@@ -12,7 +12,7 @@ import socket
 import time
 import json
 from utils import get_today
-from utils_IO import load_droid_setting
+from utilsIO import load_droid_setting
 
 # get droid name
 droid = socket.gethostname()
