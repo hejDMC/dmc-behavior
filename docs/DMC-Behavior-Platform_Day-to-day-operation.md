@@ -23,13 +23,14 @@ raspi-gpio set 4 op dh
 ## Start the experiment
 ### Create the response matrix (only once at the beginning of the training)
 - a *response matrix* is unique file for each mouse linking stimuli to responses. E.g. for the auditory 2AFC task animals it needs to be set to which side (left/right) animals need turn the wheel when either high or low tone clouds are presented to obtain rewards for correct choices.
-- for creating the `response_matrix` file, run the respective script (or use the alias if one was created previously, see the *DMC-Behavior-Platform_Software-installation* guide):
+- for creating the `response_matrix` file, run the following script (or use the alias if one was created previously, see the *DMC-Behavior-Platform_Software-installation* guide):
 ```
-python code/<create-response-matrix-script>.py
+python code/create-response-matrix.py
 ```
-- will be prompted to enter the *animal_id* of the animal in question (confirm by pressing `Enter`) and randomly assign the animal to a group (e.g. high tone clouds-right turn/low tone clouds-left turns or vice versa for the auditory 2AFC taks):
+- you will be prompted to enter the *animal_id* of the animal in question (confirm by pressing `Enter`) and the task the animal is going to perform (confirm by pressing `Enter`) the animal will be randomly assigned to a group (e.g. high tone clouds-right turn/low tone clouds-left turns or vice versa for the auditory 2AFC taks):
 ```
 enter the mouse ID: <animal_id>
+enter the task: <task>
 ```
 - now a folder with the name of the *animal_id* in the `data` directory is created containing the `<animal_id>_response_matrix.json` file is created
 - you can check this by typing:
@@ -43,12 +44,13 @@ ls data/<animal_id>
 - firstly, animals need to be habituated to being head-fixed, the auditory stimuli used and need learn to consume liquid rewards
 - for this, we run the `habituation` script by either running the script directly or use the alias if one was created previously (see the *DMC-Behavior-Platform_Software-installation* guide):
 ```
-python code/<habituation-script>.py
+python code/habituation_auditory_tasks>.py
 ```
-- you will be prompted to enter the *animal_id*, name of the experimenter and day of the habituation (confirm by pressing `Enter`):
+- you will be prompted to enter the *animal_id*, name of the experimenter, the task and day of the habituation (confirm by pressing `Enter`):
 ```
 enter the mouse ID:<animal_id>
 who is running the experiment?<name-experimenter>
+2afc task (no assumes gonogo/detection)? y/n: <y/n>
 what day of habituation is it (1/2/3)?:<day-of-habituation>
 ```
 - after you entered all required information, the habituation protocol will commence and automatically terminate once the time limit is reached
