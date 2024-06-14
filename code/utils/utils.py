@@ -98,7 +98,7 @@ def start_option(device):
 
 def check_first_day(animal_dir, task_id):
 
-    if len(animal_dir.iterdir()) > 2:
+    if len(sorted(animal_dir.iterdir())) > 2:
         meta_data = load_meta_data(animal_dir, task_id)
         if meta_data['procedure'].startswith('habituation'):
             first_day = True  # first day of training if last day was still habituation
