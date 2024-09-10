@@ -194,9 +194,9 @@ class AuditoryGoNoGo(threading.Thread):
         self.rotary_log = exp_dir.joinpath(f'{get_today()}_rotary_data.csv')
 
 
-        self.quite_window = self.task_prefs['task_prefs']['quite_window']  # quite window -> mouse needs to hold wheel still for x time, before new trial starts [0] baseline [1] exponential, as in IBL task
+        self.quiet_window = self.task_prefs['task_prefs']['quiet_window']  # quiet window -> mouse needs to hold wheel still for x time, before new trial starts [0] baseline [1] exponential, as in IBL task
         self.quite_jitter = round(self.encoder_to_degree * self.task_prefs['encoder_specs']['quite_jitter'])  # jitter of allowed movements (input from json in degree; then converted into encoder range)
-        self.animal_quite = True
+        self.animal_quiet = True
 
         # data logging
         self.trial_data_fn = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
@@ -342,10 +342,10 @@ class AuditoryGoNoGo(threading.Thread):
 
         return self.cloud
 
-    def check_quite_window(self, cloud):
+    def check_quiet_window(self, cloud):
 
         start_pos = self.encoder_data.getValue()  # start position of the wheel
-        q_w = self.quite_window[0] + np.random.exponential(self.quite_window[1])
+        q_w = self.quiet_window[0] + np.random.exponential(self.quiet_window[1])
         if q_w > 1.5:
             q_w = 1.5
         quite_time = time.time() + q_w
@@ -355,13 +355,13 @@ class AuditoryGoNoGo(threading.Thread):
                 self.cloud = self.get_target_cloud()
                 self.cloud_bool = True
             if curr_pos not in range(start_pos-self.quite_jitter, start_pos+self.quite_jitter):  # the curr_pos of the wheel is out of allowed range, exit and checker function will be called again
-                self.animal_quite = False
+                self.animal_quiet = False
                 break
             elif time.time() > quite_time:  # if animal is still for QW, bool to True and exit --> trial will be initialized
-                self.animal_quite = True
+                self.animal_quiet = True
                 break
             time.sleep(0.001)  # 1 ms sleep, otherwise some threading issue occur
-        return self.animal_quite, self.cloud
+        return self.animal_quiet, self.cloud
 
     def calculate_decision(self):  #  , wheel_position, turning_goal):
 
@@ -434,10 +434,10 @@ class AuditoryGoNoGo(threading.Thread):
         self.cloud_bool = False
 
         while True:
-            self.animal_quite, self.cloud = self.check_quite_window(self.cloud)  # call the QW checker function, stay in function as long animal holds wheel still, otherwise return and call function again
-            if self.animal_quite:  # if animal is quite for quite window length, ini new trial, otherwise stay in loop
+            self.animal_quiet, self.cloud = self.check_quiet_window(self.cloud)  # call the QW checker function, stay in function as long animal holds wheel still, otherwise return and call function again
+            if self.animal_quiet:  # if animal is quiet for quiet window length, ini new trial, otherwise stay in loop
                 trial_start = time.time()
-                self.animal_quite = False
+                self.animal_quiet = False
                 break
 
         self.target_position = response_matrix[self.trial_id]

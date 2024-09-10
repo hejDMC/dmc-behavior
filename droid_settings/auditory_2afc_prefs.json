@@ -12,7 +12,7 @@
         "punishment_sound": -1,
         "punishment_sound_duration": 0.5,
         "punishment_sound_amplitude": 1,
-        "quite_window": [1, 0.5],
+        "quiet_window": [1, 0.5],
         "bias_counter_max": 50,
         "inter_trial_interval": [0.5, 2.0],
         "stim_strength": [100, 85, 70, 60],
