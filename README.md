@@ -2,7 +2,7 @@
 ## Assembly of behavioral setups, software installation and operation
 ### Hardware assembly
 *see installation guide: `.docs/DMC-Behavior-Platform_Hardware-assembly.md`*  
-*see parts list: `.docs/DMC-Behavior_parts-list.xlsx`*
+*see parts list: `.docs/DMC-Behavior-Platform_parts-list.xlsx`*
 
 ### Software installation
 *see installation guide: `.docs/DMC-Behavior-Platform_Software-installation.md`*
