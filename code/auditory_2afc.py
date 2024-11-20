@@ -592,7 +592,7 @@ class Auditory2AFC(threading.Thread):
             mess = "low number of trials, enter 'stop' and take out animal"
             print(mess)
             self.ending_criteria = "low_trial_num"
-            self.send_mail_dummy(animal_id, droid, mess)
+
             self.stop = True
         # check disengagement
         if time.time() > time_out_lt and self.trial_num > low_trial_lim:
