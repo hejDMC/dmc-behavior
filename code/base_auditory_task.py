@@ -14,6 +14,8 @@ from reward_system import RewardSystem
 
 # Base class for common elements in auditory tasks
 class BaseAuditoryTask(threading.Thread):
+    ENCODER_TO_DEGREE = 1024/360
+    STAGE_0_TURNING_GOAL_ADJUST = 2
     def __init__(self, animal_dir, task_type):
         threading.Thread.__init__(self)
 
@@ -27,20 +29,66 @@ class BaseAuditoryTask(threading.Thread):
         self.task_prefs = self.data_io.load_task_prefs()
         self.first_day = self.check_first_day()
         self.stage = self.get_stage()
+        self.stage_advance = False
 
         self.exp_dir = None  # This can be set externally
-        self.stage_advance = False
+
         self.stop = False
 
         # Components used by all tasks
         self.stimulus_manager = StimulusManager(self.task_prefs, self.droid_settings)
-        self.reward_system = RewardSystem(self.animal_dir, self.droid_settings, self.task_prefs, self.first_day,
+
+        self.reward_system = RewardSystem(self.animal_dir, self.task_type, self.droid_settings, self.task_prefs, self.first_day,
                                           self.stage)
+        self.pump_duration = self.reward_system.pump_duration
+
+        self.stim_strength = self.task_prefs['task_prefs']['stim_strength']
+        self.cloud = []
+        self.cancel_audio = False
+        # punishment sound info
+        self.punish_sound = self.task_prefs['task_prefs']['punishment_sound']
+        self.punish_duration = self.task_prefs['task_prefs']['punishment_sound_duration']
+        self.punish_amplitude = self.task_prefs['task_prefs']['punishment_sound_amplitude']
+
+        # other task params
+        self.iti = self.task_prefs['task_prefs']['inter_trial_interval']
+        self.response_window = self.task_prefs['task_prefs']['response_window']
+
+        # set encoder parameters and initialize pins (GPIO numbers!)
+        self.encoder_left = self.droid_settings['pin_map']['IN']['encoder_left']  # pin of left encoder (green wire)
+        self.encoder_right = self.droid_settings['pin_map']['IN']['encoder_right']  # pin of right encoder (gray wire)
+        self.encoder_data = Encoder(self.encoder_left, self.encoder_right)
+        self.turning_goal = self.ENCODER_TO_DEGREE * self.task_prefs['encoder_specs']['target_degrees']  # threshold in degrees of wheel turn to count as 'choice' - converted into absolute values of 1024 encoder range
+        if self.stage == 0:
+            self.turning_goal = int(self.turning_goal / self.STAGE_0_TURNING_GOAL_ADJUST)
+
+        # quiet window parameters
+        self.quiet_window = self.task_prefs['task_prefs']['quiet_window']  # quiet window -> mouse needs to hold wheel still for x time, before new trial starts [0] baseline [1] exponential, as in IBL task
+        self.quite_jitter = round(self.ENCODER_TO_DEGREE * self.task_prefs['encoder_specs']['quite_jitter'])  # jitter of allowed movements (input from json in degree; then converted into encoder range)
+        self.animal_quiet = True
+
+
         self.logger = Logger(animal_dir, self.exp_dir)
 
         # Set GPIO mode
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
+
+        # data logging
+        self.trial_data_fn = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
+        self.tone_cloud_fn = exp_dir.joinpath(f'{get_today()}_tone_cloud_data.csv')
+        self.trial_num = 0
+        self.trial_stat = [0, 0, 0]  # number of [correct, incorrect, omission] trials
+        self.trial_start = 0
+        self.trial_id = 0
+
+        self.tone_played = 0
+        self.decision_var = 0
+        self.choice = 0
+        self.reward_time = 0
+        self.curr_iti = 0
+
+
 
     def check_first_day(self) -> bool:
         """
@@ -107,6 +155,8 @@ class BaseAuditoryTask(threading.Thread):
         print(f"Stage: {stage}")
         return stage
 
+
+
     def run(self):
         while not self.stop:
             self.execute_task()
@@ -121,33 +171,3 @@ class BaseAuditoryTask(threading.Thread):
 
 
 
-# Example of a Task Specific Class using the Base Class
-class Auditory2AFC(BaseAuditoryTask):
-    def __init__(self, procedure, animal_dir):
-        super().__init__(procedure, animal_dir)
-        self.turning_goal = self.droid_settings['base_params']['turning_goal']
-        self.encoder_data = Encoder(self.droid_settings['pin_map']['IN']['encoder_left'],
-                                    self.droid_settings['pin_map']['IN']['encoder_right'])
-
-    def execute_task(self):
-        # Example implementation for 2AFC task
-        trial_id = random.choice(['high', 'low'])
-        if trial_id == 'high':
-            cloud = self.stimulus_manager.create_tone_cloud(tgt_octave=2, stim_strength=80)
-        else:
-            cloud = self.stimulus_manager.create_tone_cloud(tgt_octave=0, stim_strength=80)
-        # ... More logic for the specific trial
-
-    def stage_checker(self):
-        # Logic for checking stage progression
-        if self.trial_stat[0] > 300:
-            self.stage_advance = True
-            print(f">>>>>  FINISHED STAGE {self.stage} !!! <<<<<")
-
-    def adjust_pump_duration(self):
-        if self.decision_var == self.bias_correction and self.bias_counter <= self.bias_counter_max:  # if the animal choose anti-bias side, give more reward
-            curr_pump_duration = int(self.pump_duration * 2)
-            self.bias_counter += 1  # only reward first x trials with higher volume
-        else:
-            curr_pump_duration = int(self.pump_duration)
-        return curr_pump_duration

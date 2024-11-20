@@ -53,10 +53,10 @@ class DataIO:
             pump_time = 50
         return pump_time
 
-    def load_response_matrix(self, animal_id: str, in_task: bool = False) -> tuple:
+    def load_response_matrix(self, in_task: bool = False) -> tuple:
         """Load the response matrix for a given animal ID."""
 
-        response_matrix_path = self.animal_dir.joinpath(f"{animal_id}_response_matrix.json")
+        response_matrix_path = self.animal_dir.joinpath(f"{self.animal_dir.stem}_response_matrix.json")
         pre_reversal = True
         if response_matrix_path.exists():
             with open(response_matrix_path, 'r') as f:
@@ -67,7 +67,7 @@ class DataIO:
                 response_matrix = response_matrix['post_reversal']
             return response_matrix, pre_reversal
         else:
-            print(f"Warning: Response matrix for animal {animal_id} not found.")
+            print(f"Warning: Response matrix for animal {self.animal_dir.stem} not found.")
             return {}, pre_reversal
 
 

@@ -1,17 +1,18 @@
 import time
 import pandas as pd
 import RPi.GPIO as GPIO
-
+from data_io import DataIO
 # Reward System class for managing reward dispensing
 class RewardSystem:
     # todo have something here for pullup or pulldown
-    def __init__(self, animal_dir, droid_settings, task_prefs, first_day, stage):
+    def __init__(self, animal_dir, task_type, droid_settings, task_prefs, first_day, stage):
         self.animal_dir = animal_dir
+        self.data_io = DataIO(DataIO(self.animal_dir.parents[1], task_type, self.animal_dir.stem))
         self.droid_settings = droid_settings
         self.task_prefs = task_prefs
         self.first_day = first_day
         self.stage = stage
-        self.pump_time = load_pump_calibration()
+        self.pump_time = self.data_io.load_pump_calibration()
         self.pump_min_max = [p * self.pump_time for p in self.task_prefs['task_prefs']['reward_size']]
         # self.pump_duration = self.pump_min_max[0]
         self.pump_duration = self.get_pump_duration()
@@ -92,6 +93,7 @@ class RewardSystem:
 
     def trigger_reward(self, curr_pump_duration):
         # todo call pump log
+        # todo check for adjusted pump times in 2AFC task
         GPIO.output(self.pump, GPIO.HIGH)
         time.sleep(curr_pump_duration / 1000)
         GPIO.output(self.pump, GPIO.LOW)
