@@ -8,7 +8,6 @@ class RewardSystem:
     def __init__(self, data_io, task_type, droid_settings, task_prefs, first_day, stage):
         self.data_io = data_io
         self.animal_dir = data_io.animal_dir
-        self.droid_settings = droid_settings
         self.task_prefs = task_prefs
         self.first_day = first_day
         self.stage = stage
@@ -16,7 +15,7 @@ class RewardSystem:
         self.pump_min_max = [p * self.pump_time for p in self.task_prefs['task_prefs']['reward_size']]
         # self.pump_duration = self.pump_min_max[0]
         self.pump_duration = self.get_pump_duration()
-        self.pump = self.droid_settings['pin_map']['OUT']['pump']
+        self.pump = droid_settings['pin_map']['OUT']['pump']
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pump, GPIO.OUT)

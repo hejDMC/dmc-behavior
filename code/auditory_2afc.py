@@ -54,7 +54,7 @@ class Auditory2AFC(BaseAuditoryTask):
         self.time_out_low_trials = start_time + self.TIME_LIMIT_LOW_TRIALS * self.SECONDS
 
         self.response_matrix, self.pre_reversal = data_io.load_response_matrix()
-        self.turning_goal = self.droid_settings['base_params']['turning_goal']
+        self.turning_goal = self.task_prefs['encoder_specs']['target_degrees']
         self.encoder_data = Encoder(self.droid_settings['pin_map']['IN']['encoder_left'],
                                     self.droid_settings['pin_map']['IN']['encoder_right'])
 
