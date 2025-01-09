@@ -357,7 +357,7 @@ class BiasCorrectionHandler:
             animal_dir (Path): Path to the animal's data directory.
             first_day (bool): Flag indicating if it is the first day of training.
         """
-        self.animal_dir = data_io.animal_id
+        self.animal_dir = data_io.animal_dir
         self.first_day = first_day
         self.bias_correction = False
         self.stage = stage
