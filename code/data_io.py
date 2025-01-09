@@ -116,7 +116,7 @@ class DataIO:
         task_prefs = self.load_task_prefs()
         save_path = exp_dir.joinpath(f'droid_and_task_prefs.json')
         with open(save_path, 'w') as f:
-            json.dump({"droid_prefs": droid_prefs, "task_prefs": task_prefs}, f)
+            json.dump({"droid_prefs": droid_prefs, "task_prefs": task_prefs}, f, indent=4)
 
     def store_meta_data(self, droid, start_time, end_time, exp_dir, task_obj, sync_bool, camera_bool,
                     ending_criteria=None, procedure="not specified", pre_reversal="not specified",
@@ -172,7 +172,7 @@ class DataIO:
 
         meta_data_path = exp_dir.joinpath( f'{self.path_manager.get_today()}_{self.animal_dir.stem}_meta-data.json')
         with open(meta_data_path, 'w') as f:
-            json.dump(meta_data, f)
+            json.dump(meta_data, f, indent=4)
 
     def load_trial_header(self):
         """
