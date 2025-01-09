@@ -62,7 +62,7 @@ class BaseAuditoryTask(threading.Thread):
         self.animal_quiet = True
 
 
-        self.logger = Logger(self.animal_dir, self.exp_dir)
+        self.logger = Logger(self.data_io, self.exp_dir)
 
         # Set GPIO mode
         # GPIO.setwarnings(False)
