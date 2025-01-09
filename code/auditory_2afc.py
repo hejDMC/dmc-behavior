@@ -240,7 +240,7 @@ class Auditory2AFC(BaseAuditoryTask):
 
     def check_stage(self):
         # Logic for checking stage progression
-        self.stage_checker = StageChecker(self.stage, self.trial_stat, self.trial_num, self.decision_history,
+        self.stage_checker = StageChecker(self.data_io, self.stage, self.trial_stat, self.trial_num, self.decision_history,
                                           self.correct_hist, self.animal_dir)
         self.stage_advance = self.stage_checker.check_stage()
 

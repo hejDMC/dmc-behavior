@@ -3,7 +3,6 @@ import json
 import math
 import numpy as np
 import pandas as pd
-from data_io import DataIO
 
 from utils.psychofit import mle_fit_psycho, weibull, weibull50, erf_psycho, erf_psycho_2gammas
 
@@ -33,7 +32,7 @@ class StageChecker:
 
 
 
-    def __init__(self, stage, trial_stat, trial_num, decision_history, correct_hist, animal_dir: Path):
+    def __init__(self, data_io, stage, trial_stat, trial_num, decision_history, correct_hist, animal_dir: Path):
         """
         Initialize the StageChecker with relevant attributes.
 
@@ -52,7 +51,7 @@ class StageChecker:
         self.correct_hist = correct_hist
         self.animal_dir = animal_dir
         self.stage_advance = False
-        self.data_io = DataIO(self.animal_dir.parents[1], self.TASK_TYPE, self.animal_dir.stem)
+        self.data_io = data_io
         self.response_matrix = self.data_io.load_response_matrix()
 
     def check_stage(self):
