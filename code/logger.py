@@ -9,7 +9,7 @@ class Logger:
 
     def log_trial_data(self, trial_info):
         with open(self.trial_data_fn, "a") as log:
-            log.write(trial_info + "\n")
+            log.write(trial_info)
 
     def log_pump_data(self, pump_duration):
         with open(self.pump_log, "a") as log:
