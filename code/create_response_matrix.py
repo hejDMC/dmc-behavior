@@ -9,8 +9,8 @@ import random
 import json
 from pathlib import Path
 
-from path_manager import PathManager
-from data_io import DataIO
+from tasks.managers.path_manager import PathManager
+from tasks.managers.data_io import DataIO
 
 
 # get the animal id

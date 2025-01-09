@@ -2,11 +2,11 @@ import sys, socket, time
 from datetime import datetime
 from pathlib import Path
 
-from path_manager import PathManager
-from data_io import DataIO
-from auditory_2afc import Auditory2AFC
-from reader_writers import RotaryRecorder, SyncRecorder, TriggerPulse
-from utils.utils import plot_behavior_terminal
+from tasks.managers.path_manager import PathManager
+from tasks.managers.data_io import DataIO
+from tasks.auditory_2afc import Auditory2AFC
+from tasks.managers.reader_writers import RotaryRecorder, SyncRecorder, TriggerPulse
+from tasks.managers.utils.utils import plot_behavior_terminal
 
 task, sync_rec, camera, rotary, exp_dir = None, None, None, None, None
 droid = socket.gethostname()

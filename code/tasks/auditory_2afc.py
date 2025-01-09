@@ -25,7 +25,6 @@ import pandas as pd
 import sounddevice as sd
 import time
 import random
-from utils.encoder import Encoder
 from base_auditory_task import BaseAuditoryTask
 from auditory_2afc_helpers import StageChecker, BiasCorrectionHandler
 

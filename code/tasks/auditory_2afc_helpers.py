@@ -4,7 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 
-from utils.psychofit import mle_fit_psycho, weibull, weibull50, erf_psycho, erf_psycho_2gammas
+from managers.utils.psychofit import mle_fit_psycho, weibull, weibull50, erf_psycho, erf_psycho_2gammas
 
 class StageChecker:
     STAGE_0_CRITERIA = 300  # Criteria for advancing from stage 0 to stage 1

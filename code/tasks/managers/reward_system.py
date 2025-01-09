@@ -1,7 +1,7 @@
 import time
 import pandas as pd
 import RPi.GPIO as GPIO
-from data_io import DataIO
+
 # Reward System class for managing reward dispensing
 class RewardSystem:
     # todo have something here for pullup or pulldown

@@ -12,8 +12,8 @@ from pathlib import Path
 import socket
 import time
 import json
-from path_manager import PathManager
-from data_io import DataIO
+from tasks.managers.path_manager import PathManager
+from tasks.managers.data_io import DataIO
 
 path_manager = PathManager((Path(__file__).parent / '..').resolve(), None)
 data_io = DataIO(path_manager, None)

@@ -1,10 +1,10 @@
 
 import threading
 import RPi.GPIO as GPIO
-from utils.encoder import Encoder
-from logger import Logger
-from stimulus_manager import StimulusManager
-from reward_system import RewardSystem
+from managers.utils.encoder import Encoder
+from managers.logger import Logger
+from managers.stimulus_manager import StimulusManager
+from managers.reward_system import RewardSystem
 
 # Base class for common elements in auditory tasks
 class BaseAuditoryTask(threading.Thread):
