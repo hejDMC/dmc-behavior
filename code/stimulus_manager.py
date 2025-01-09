@@ -1,10 +1,11 @@
 import random
 import numpy as np
+import pandas as pd
 from sklearn import preprocessing
 
 # Stimulus Manager class to manage tone clouds and stimulus-related methods
 class StimulusManager:
-    def __init__(self, task_prefs, droid_settings):
+    def __init__(self, task_prefs, droid_settings, data_io, exp_dir):
         self.task_prefs = task_prefs
         self.droid_settings = droid_settings
         self.fs = droid_settings['base_params']['tone_sampling_rate']
@@ -16,7 +17,7 @@ class StimulusManager:
         self.tones_arr = self.generate_tones()
         self.cloud_duration = self.task_prefs['task_prefs']['cloud_duration']
         self.num_tones = int(self.cloud_duration * 100 - (self.tone_duration - 1 / self.tone_fs) * 100)
-        print(f"num tones {self.num_tones}")
+        self.tone_cloud_fn = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_tone_cloud.csv')
         # todo option for tones vs tone clouds
 
     def pitch_to_frequency(self, pitch):
@@ -111,8 +112,7 @@ class StimulusManager:
         tone_cloud_duration = self.fs * self.cloud_duration
         tone_cloud = np.zeros([int(tone_cloud_duration), len(tone_sequence)])
         k = 0
-        # todo: save tone cloud data
-        # pd.DataFrame(tone_sequence).T.to_csv(self.tone_cloud_fn, index=False, header=False, mode='a')
+        pd.DataFrame(tone_sequence).T.to_csv(self.tone_cloud_fn, index=False, header=False, mode='a')
         for i, tone in enumerate(tone_sequence):
             tone_cloud[k:k + int(self.fs * self.tone_duration), i] = self.create_tone(self.fs, tone, self.tone_duration,
                                                                                       self.tone_amplitude)

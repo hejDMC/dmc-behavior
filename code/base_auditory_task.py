@@ -28,7 +28,7 @@ class BaseAuditoryTask(threading.Thread):
         self.ending_criteria = "manual"
 
         # Components used by all tasks
-        self.stimulus_manager = StimulusManager(self.task_prefs, self.droid_settings)
+        self.stimulus_manager = StimulusManager(self.task_prefs, self.droid_settings, self.data_io, exp_dir)
 
         self.reward_system = RewardSystem(self.data_io, self.task_type, self.droid_settings, self.task_prefs, self.first_day,
                                           self.stage)
