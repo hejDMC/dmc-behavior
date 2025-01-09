@@ -1,5 +1,6 @@
-from pathlib import Path
 from datetime import date, datetime
+from pathlib import Path
+
 
 class PathManager:
     def __init__(self, base_dir: Path, animal_id: str):
@@ -18,7 +19,7 @@ class PathManager:
         :return: animal_dir: Path
         """
 
-        data_directory = self.base_dir.joinpath('data')
+        data_directory = self.base_dir.joinpath("data")
         animal_dir = data_directory.joinpath(self.animal_id)
         if animal_dir.exists():
             pass
@@ -34,7 +35,9 @@ class PathManager:
         :return: exp_dir: Path
         """
         animal_dir = self.check_dir()
-        date_dir = animal_dir.joinpath(self.get_today())  # store data in folders per day
+        date_dir = animal_dir.joinpath(
+            self.get_today()
+        )  # store data in folders per day
         exp_dir = date_dir.joinpath(self.get_hours())
         exp_dir.mkdir(parents=True)
 
@@ -45,7 +48,7 @@ class PathManager:
         Dummy function to get date in YYYYMMDD format
         :return: today: str
         """
-        datetime_format = '%Y%m%d'
+        datetime_format = "%Y%m%d"
         today = date.today().strftime(datetime_format)
         return today
 

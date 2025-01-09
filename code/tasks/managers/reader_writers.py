@@ -1,18 +1,20 @@
 import threading
 import time
+
 import RPi.GPIO as GPIO
 from data_io import DataIO
 from utils.encoder import Encoder
 from utils.sync_pulse import Sync_Pulse
+
 
 class BaseRecorder(threading.Thread):
     def __init__(self, path_manager, exp_dir, task_type, file_name_suffix, rate_key):
         super().__init__()
         data_io = DataIO(path_manager, task_type)
         self.droid_settings = data_io.load_droid_setting()
-        self.rate = self.droid_settings['base_params'][rate_key]
+        self.rate = self.droid_settings["base_params"][rate_key]
 
-        self.fn = exp_dir.joinpath(f'{path_manager.get_today()}_{file_name_suffix}.csv')
+        self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_{file_name_suffix}.csv")
         self.stop = False
 
     def write_data(self, data):
@@ -29,11 +31,16 @@ class BaseRecorder(threading.Thread):
         raise NotImplementedError("Subclasses must implement the record method.")
 
 
-
 class TriggerPulse(BaseRecorder):
     def __init__(self, path_manager, exp_dir, task_type):
-        super().__init__(path_manager, exp_dir, task_type, file_name_suffix='camera_pulse_data', rate_key='camera_trigger_rate')
-        self.trigger_pin = self.droid_settings['pin_map']['OUT']['trigger_camera']
+        super().__init__(
+            path_manager,
+            exp_dir,
+            task_type,
+            file_name_suffix="camera_pulse_data",
+            rate_key="camera_trigger_rate",
+        )
+        self.trigger_pin = self.droid_settings["pin_map"]["OUT"]["trigger_camera"]
         self.trigger_state = 0
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
@@ -54,9 +61,15 @@ class TriggerPulse(BaseRecorder):
 
 class RotaryRecorder(BaseRecorder):
     def __init__(self, path_manager, exp_dir, task_type):
-        super().__init__(path_manager, exp_dir, task_type, file_name_suffix='rotary_data', rate_key='rotary_rate')
-        self.encoder_left = self.droid_settings['pin_map']['IN']['encoder_left_rec']
-        self.encoder_right = self.droid_settings['pin_map']['IN']['encoder_right_rec']
+        super().__init__(
+            path_manager,
+            exp_dir,
+            task_type,
+            file_name_suffix="rotary_data",
+            rate_key="rotary_rate",
+        )
+        self.encoder_left = self.droid_settings["pin_map"]["IN"]["encoder_left_rec"]
+        self.encoder_right = self.droid_settings["pin_map"]["IN"]["encoder_right_rec"]
         self.encoder_data = Encoder(self.encoder_left, self.encoder_right)
 
     def record(self):
@@ -67,19 +80,20 @@ class RotaryRecorder(BaseRecorder):
 
 class SyncRecorder(BaseRecorder):
     def __init__(self, path_manager, exp_dir, task_type):
-        super().__init__(path_manager, exp_dir, task_type, file_name_suffix='sync_pulse_data', rate_key='2p_sync_rate')
-        self.sync_pin = self.droid_settings['pin_map']['IN']['microscope_sync']
+        super().__init__(
+            path_manager,
+            exp_dir,
+            task_type,
+            file_name_suffix="sync_pulse_data",
+            rate_key="2p_sync_rate",
+        )
+        self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
         self.sync_pulse = Sync_Pulse(self.sync_pin)
 
     def record(self):
         sync_value = str(self.sync_pulse.get_value())
         self.write_data(sync_value)
         time.sleep(1 / self.rate)
-
-
-
-
-
 
 
 #

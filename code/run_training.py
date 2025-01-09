@@ -1,9 +1,10 @@
-import sys, socket
+import socket
+import sys
 from datetime import datetime
 from pathlib import Path
 
-from tasks.managers.path_manager import PathManager
 from tasks.managers.data_io import DataIO
+from tasks.managers.path_manager import PathManager
 from tasks.managers.reader_writers import RotaryRecorder, SyncRecorder, TriggerPulse
 from tasks.managers.utils.utils import plot_behavior_terminal
 
@@ -15,11 +16,11 @@ droid = socket.gethostname()
 #     camera_bool = start_option('camera_trigger') # for bb8 comment this line too (for now) todo: check if you want ot change this
 
 
-task_list = ['2afc', 'gonogo', 'detection']
+task_list = ["2afc", "gonogo", "detection"]
 task_dict = {
-    'auditory_2afc': 'Auditory2AFC',
-    'auditory_gonogo': 'AuditoryGoNoGo',
-    'auditory_detection': 'AuditoryDetection'
+    "auditory_2afc": "Auditory2AFC",
+    "auditory_gonogo": "AuditoryGoNoGo",
+    "auditory_detection": "AuditoryDetection",
 }
 
 # get the animal id and load the response matrix
@@ -28,12 +29,12 @@ animal_id = input("enter the mouse ID:")
 input_task = input("enter the task:")
 while True:
     if input_task in task_list:
-        task_type = f'auditory_{input_task}'
+        task_type = f"auditory_{input_task}"
         task_class_name = task_dict[task_type]
         break
     else:
         print("please enter one of the following names:")
-        print(*task_list, sep=', ')
+        print(*task_list, sep=", ")
     task = input("enter the task:")
 
 module = __import__(f"tasks.{task_type}", fromlist=[task_class_name])
@@ -45,7 +46,7 @@ experimenter = input("who is running the experiment?")
 hour_format = "%H:%M:%S"
 start_time = datetime.now().strftime(hour_format)
 
-path_manager = PathManager((Path(__file__).parent / '..').resolve(), animal_id)
+path_manager = PathManager((Path(__file__).parent / "..").resolve(), animal_id)
 data_io = DataIO(path_manager, task_type)
 
 
@@ -82,10 +83,22 @@ while True:
         if camera_bool:
             camera.stop = True
         # GPIO.cleanup()
-        end_time = datetime.now().strftime(hour_format) # not the real endtime, but the time of entering "stop"
-        data_io.store_meta_data(droid, start_time, end_time, exp_dir, task, sync_bool, camera_bool,
-                        ending_criteria=ending_criteria, procedure=task_type, pre_reversal=task.pre_reversal,
-                        experimenter=experimenter)
+        end_time = datetime.now().strftime(
+            hour_format
+        )  # not the real endtime, but the time of entering "stop"
+        data_io.store_meta_data(
+            droid,
+            start_time,
+            end_time,
+            exp_dir,
+            task,
+            sync_bool,
+            camera_bool,
+            ending_criteria=ending_criteria,
+            procedure=task_type,
+            pre_reversal=task.pre_reversal,
+            experimenter=experimenter,
+        )
         # store_reaction_times(exp_dir, task)
         data_io.store_pref_data(exp_dir)
         task.join()

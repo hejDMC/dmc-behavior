@@ -1,21 +1,21 @@
-
-import threading, time
 import random
-
-import RPi.GPIO as GPIO
+import threading
+import time
 
 import numpy as np
+import pandas as pd
 import sounddevice as sd
-
-from managers.utils.encoder import Encoder
 from managers.logger import Logger
-from managers.stimulus_manager import StimulusManager
 from managers.reward_system import RewardSystem
+from managers.stimulus_manager import StimulusManager
+from managers.utils.encoder import Encoder
+
 
 # Base class for common elements in auditory tasks
 class BaseAuditoryTask(threading.Thread):
-    ENCODER_TO_DEGREE = 1024/360
+    ENCODER_TO_DEGREE = 1024 / 360
     STAGE_0_TURNING_GOAL_ADJUST = 2
+
     def __init__(self, data_io, exp_dir, task_type):
         threading.Thread.__init__(self)
         self.data_io = data_io
@@ -36,44 +36,69 @@ class BaseAuditoryTask(threading.Thread):
         self.ending_criteria = "manual"
 
         # Components used by all tasks
-        self.stimulus_manager = StimulusManager(self.task_prefs, self.droid_settings, self.data_io, exp_dir)
+        self.stimulus_manager = StimulusManager(
+            self.task_prefs, self.droid_settings, self.data_io, exp_dir
+        )
 
-        self.reward_system = RewardSystem(self.data_io, self.task_type, self.droid_settings, self.task_prefs, self.first_day,
-                                          self.stage)
+        self.reward_system = RewardSystem(
+            self.data_io,
+            self.task_type,
+            self.droid_settings,
+            self.task_prefs,
+            self.first_day,
+            self.stage,
+        )
 
-        self.stim_strength = self.task_prefs['task_prefs']['stim_strength']
+        self.stim_strength = self.task_prefs["task_prefs"]["stim_strength"]
         self.cloud = []
         self.cloud_bool = False
         self.cancel_audio = False
         # punishment sound info
-        self.punish_sound = self.task_prefs['task_prefs']['punishment_sound']
-        self.punish_duration = self.task_prefs['task_prefs']['punishment_sound_duration']
-        self.punish_amplitude = self.task_prefs['task_prefs']['punishment_sound_amplitude']
+        self.punish_sound = self.task_prefs["task_prefs"]["punishment_sound"]
+        self.punish_duration = self.task_prefs["task_prefs"][
+            "punishment_sound_duration"
+        ]
+        self.punish_amplitude = self.task_prefs["task_prefs"][
+            "punishment_sound_amplitude"
+        ]
 
         # other task params
         self.target_position = None
         self.wheel_start_position = None
-        self.iti = self.task_prefs['task_prefs']['inter_trial_interval']
-        self.response_window = self.task_prefs['task_prefs']['response_window']
+        self.iti = self.task_prefs["task_prefs"]["inter_trial_interval"]
+        self.response_window = self.task_prefs["task_prefs"]["response_window"]
 
         # set encoder parameters and initialize pins (GPIO numbers!)
-        self.encoder_data = Encoder(self.droid_settings['pin_map']['IN']['encoder_left'],
-                                    self.droid_settings['pin_map']['IN']['encoder_right'])
-        self.turning_goal = self.ENCODER_TO_DEGREE * self.task_prefs['encoder_specs']['target_degrees']  # threshold in degrees of wheel turn to count as 'choice' - converted into absolute values of 1024 encoder range
+        self.encoder_data = Encoder(
+            self.droid_settings["pin_map"]["IN"]["encoder_left"],
+            self.droid_settings["pin_map"]["IN"]["encoder_right"],
+        )
+        self.turning_goal = (
+            self.ENCODER_TO_DEGREE * self.task_prefs["encoder_specs"]["target_degrees"]
+        )  # threshold in degrees of wheel turn to count as 'choice' - converted into absolute values of 1024 encoder range
         if self.stage == 0:
-            self.turning_goal = int(self.turning_goal / self.STAGE_0_TURNING_GOAL_ADJUST)
+            self.turning_goal = int(
+                self.turning_goal / self.STAGE_0_TURNING_GOAL_ADJUST
+            )
 
         # quiet window parameters
-        self.quiet_window = self.task_prefs['task_prefs']['quiet_window']  # quiet window -> mouse needs to hold wheel still for x time, before new trial starts [0] baseline [1] exponential, as in IBL task
-        self.quite_jitter = round(self.ENCODER_TO_DEGREE * self.task_prefs['encoder_specs']['quite_jitter'])  # jitter of allowed movements (input from json in degree; then converted into encoder range)
+        self.quiet_window = self.task_prefs["task_prefs"][
+            "quiet_window"
+        ]  # quiet window -> mouse needs to hold wheel still for x time, before new trial starts [0] baseline [1] exponential, as in IBL task
+        self.quite_jitter = round(
+            self.ENCODER_TO_DEGREE * self.task_prefs["encoder_specs"]["quite_jitter"]
+        )  # jitter of allowed movements (input from json in degree; then converted into encoder range)
         self.animal_quiet = True
-
 
         self.logger = Logger(self.data_io, self.exp_dir)
 
         # data logging
-        self.trial_data_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_trial_data.csv')
-        self.tone_cloud_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_tone_cloud_data.csv')
+        self.trial_data_fn = exp_dir.joinpath(
+            f"{self.data_io.path_manager.get_today()}_trial_data.csv"
+        )
+        self.tone_cloud_fn = exp_dir.joinpath(
+            f"{self.data_io.path_manager.get_today()}_tone_cloud_data.csv"
+        )
         self.trial_num = 0
         self.trial_stat = [0, 0, 0]  # number of [correct, incorrect, omission] trials
         self.trial_start = 0
@@ -84,8 +109,6 @@ class BaseAuditoryTask(threading.Thread):
         self.choice = 0
         self.reward_time = 0
         self.curr_iti = 0
-
-
 
     def check_first_day(self) -> bool:
         """
@@ -106,7 +129,7 @@ class BaseAuditoryTask(threading.Thread):
 
         try:
             meta_data = self.data_io.load_meta_data()
-            if meta_data.get('procedure', '').startswith('habituation'):
+            if meta_data.get("procedure", "").startswith("habituation"):
                 return True
             else:
                 return False
@@ -128,8 +151,12 @@ class BaseAuditoryTask(threading.Thread):
 
         try:
             meta_data = self.data_io.load_meta_data()
-            curr_stage = meta_data.get('curr_stage', 0)  # Default to 0 if 'curr_stage' is missing
-            stage_advance = meta_data.get('stage_advance', False)  # Default to False if 'stage_advance' is missing
+            curr_stage = meta_data.get(
+                "curr_stage", 0
+            )  # Default to 0 if 'curr_stage' is missing
+            stage_advance = meta_data.get(
+                "stage_advance", False
+            )  # Default to False if 'stage_advance' is missing
 
             if not stage_advance:
                 stage = curr_stage
@@ -151,36 +178,56 @@ class BaseAuditoryTask(threading.Thread):
         Returns:
             The generated tone cloud.
         """
-        if self.task_type == 'auditory_2afc':
+        if self.task_type == "auditory_2afc":
             stage_selector = {
                 0: [self.stim_strength[0]],  # Stage 0, always 100
                 1: [self.stim_strength[0]],  # Stage 1, always 100
                 2: [self.stim_strength[0], self.stim_strength[1]],  # Stage 2, 100 or 80
-                3: [self.stim_strength[0], self.stim_strength[1], self.stim_strength[2]],  # Stage 3, 100, 80, or 70
-                4: [self.stim_strength[0], self.stim_strength[1], self.stim_strength[2], self.stim_strength[3]],  # Stage 4, 100, 80, 70 or 60
-                5: [self.stim_strength[0], self.stim_strength[1], self.stim_strength[2], self.stim_strength[3]]  # Stage 5, 100, 80, 70 or 60
+                3: [
+                    self.stim_strength[0],
+                    self.stim_strength[1],
+                    self.stim_strength[2],
+                ],  # Stage 3, 100, 80, or 70
+                4: [
+                    self.stim_strength[0],
+                    self.stim_strength[1],
+                    self.stim_strength[2],
+                    self.stim_strength[3],
+                ],  # Stage 4, 100, 80, 70 or 60
+                5: [
+                    self.stim_strength[0],
+                    self.stim_strength[1],
+                    self.stim_strength[2],
+                    self.stim_strength[3],
+                ],  # Stage 5, 100, 80, 70 or 60
             }
 
             if self.stage in stage_selector:
                 options = stage_selector[self.stage]
             else:
-                print(f'Warning: Stage {self.stage} out of range (0-5), defaulting to stage 0')
+                print(
+                    f"Warning: Stage {self.stage} out of range (0-5), defaulting to stage 0"
+                )
                 options = stage_selector[0]  # default to stage 0
 
             self.curr_stim_strength = random.choice(options)
 
-            tgt_octave = 2 if self.trial_id == 'high' else 0
+            tgt_octave = 2 if self.trial_id == "high" else 0
 
-            self.cloud = self.stimulus_manager.create_tone_cloud(tgt_octave, self.curr_stim_strength)
+            self.cloud = self.stimulus_manager.create_tone_cloud(
+                tgt_octave, self.curr_stim_strength
+            )
 
             return self.cloud
         else:
             curr_stim_strength = self.stim_strength[0]
-            if self.task_type == 'auditory_gonogo':
-                tgt_octave = 2 if self.trial_id == 'high' else 0
+            if self.task_type == "auditory_gonogo":
+                tgt_octave = 2 if self.trial_id == "high" else 0
             else:
                 tgt_octave = 1
-            self.cloud = self.stimulus_manager.create_tone_cloud(tgt_octave, curr_stim_strength)
+            self.cloud = self.stimulus_manager.create_tone_cloud(
+                tgt_octave, curr_stim_strength
+            )
 
             return self.cloud
 
@@ -196,10 +243,14 @@ class BaseAuditoryTask(threading.Thread):
             if not self.cloud_bool:
                 self.cloud = self.get_target_cloud()
                 self.cloud_bool = True
-            if curr_pos not in range(start_pos-self.quite_jitter, start_pos+self.quite_jitter):  # the curr_pos of the wheel is out of allowed range, exit and checker function will be called again
+            if curr_pos not in range(
+                start_pos - self.quite_jitter, start_pos + self.quite_jitter
+            ):  # the curr_pos of the wheel is out of allowed range, exit and checker function will be called again
                 self.animal_quiet = False
                 break
-            elif time.time() > quite_time:  # if animal is still for QW, bool to True and exit --> trial will be initialized
+            elif (
+                time.time() > quite_time
+            ):  # if animal is still for QW, bool to True and exit --> trial will be initialized
                 self.animal_quiet = True
                 break
             time.sleep(0.001)  # 1 ms sleep, otherwise some threading issue occur
@@ -217,17 +268,25 @@ class BaseAuditoryTask(threading.Thread):
         outdata[:] = np.column_stack((self.cloud, self.cloud))  # two channels
 
     def check_disengage(self, criteria_variable):
-        if self.task_type == 'auditory_2afc':
-            sess_median = pd.DataFrame(criteria_variable).median()  # median of reaction times of session
-            roll_median = pd.DataFrame(criteria_variable).rolling(20).median()  # rolling median (window=20) of reaction times
-            if (sess_median[0]*4) < roll_median.iloc[-1][0]:  # check if last roll_median is > 4x the session median todo check if this makes sense, or rather 3x
+        if self.task_type == "auditory_2afc":
+            sess_median = pd.DataFrame(
+                criteria_variable
+            ).median()  # median of reaction times of session
+            roll_median = (
+                pd.DataFrame(criteria_variable).rolling(20).median()
+            )  # rolling median (window=20) of reaction times
+            if (sess_median[0] * 4) < roll_median.iloc[-1][
+                0
+            ]:  # check if last roll_median is > 4x the session median todo check if this makes sense, or rather 3x
                 self.disengage = True  # set disengage bool to True
             elif roll_median.iloc[-1][0] >= self.response_window:
                 self.disengage = True
             else:
                 self.disengage = False  # can be reversed (for now..)
         else:
-            if np.sum(criteria_variable[-20:]) < 4:  # value of 4 corresponds to 4x moved_wheel responses
+            if (
+                np.sum(criteria_variable[-20:]) < 4
+            ):  # value of 4 corresponds to 4x moved_wheel responses
                 self.disengage = True  # set disengage bool to True
             else:
                 self.disengage = False  # can be reversed (for now..)
@@ -242,8 +301,3 @@ class BaseAuditoryTask(threading.Thread):
 
     def stage_checker(self):
         raise NotImplementedError("This method should be implemented by subclasses.")
-
-
-
-
-

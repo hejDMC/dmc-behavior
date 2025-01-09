@@ -19,12 +19,15 @@ Matteo Carandini, 2000-2015
 """
 
 import functools
+
 import numpy as np
 import scipy.optimize
 from scipy.special import erf
 
 
-def mle_fit_psycho(data, P_model='weibull', parstart=None, parmin=None, parmax=None, nfits=5):
+def mle_fit_psycho(
+    data, P_model="weibull", parstart=None, parmin=None, parmax=None, nfits=5
+):
     """
     Maximumum likelihood fit of psychometric function.
     Args:
@@ -69,31 +72,36 @@ def mle_fit_psycho(data, P_model='weibull', parstart=None, parmin=None, parmax=N
     if isinstance(data, (list, tuple)):
         data = np.array(data)
     elif not isinstance(data, np.ndarray):
-        raise TypeError('data must be a list or numpy array')
+        raise TypeError("data must be a list or numpy array")
 
     if data.shape[0] != 3:
-        raise ValueError('data must be m by 3 matrix')
+        raise ValueError("data must be m by 3 matrix")
 
-    rep = lambda x: (x, x) if P_model.endswith('2gammas') else (x,)
+    rep = lambda x: (x, x) if P_model.endswith("2gammas") else (x,)
     if parstart is None:
-        parstart = np.array([np.mean(data[0, :]), 3., *rep(.05)])
+        parstart = np.array([np.mean(data[0, :]), 3.0, *rep(0.05)])
     if parmin is None:
-        parmin = np.array([np.min(data[0, :]), 0., *rep(0.)])
+        parmin = np.array([np.min(data[0, :]), 0.0, *rep(0.0)])
     if parmax is None:
-        parmax = np.array([np.max(data[0, :]), 10., *rep(.4)])
+        parmax = np.array([np.max(data[0, :]), 10.0, *rep(0.4)])
 
     # find the good values in pp (conditions that were effectively run)
     ii = np.isfinite(data[2, :])
 
-    likelihoods = np.zeros(nfits,)
+    likelihoods = np.zeros(
+        nfits,
+    )
     pars = np.empty((nfits, parstart.size))
 
-    f = functools.partial(neg_likelihood, data=data[:, ii],
-                          P_model=P_model, parmin=parmin, parmax=parmax)
+    f = functools.partial(
+        neg_likelihood, data=data[:, ii], P_model=P_model, parmin=parmin, parmax=parmax
+    )
     for ifit in range(nfits):
         pars[ifit, :] = scipy.optimize.fmin(f, parstart, disp=False)
-        parstart = parmin + np.random.rand(parmin.size) * (parmax-parmin)
-        likelihoods[ifit] = -neg_likelihood(pars[ifit, :], data[:, ii], P_model, parmin, parmax)
+        parstart = parmin + np.random.rand(parmin.size) * (parmax - parmin)
+        likelihoods[ifit] = -neg_likelihood(
+            pars[ifit, :], data[:, ii], P_model, parmin, parmax
+        )
 
     # the values to be output
     L = likelihoods.max()
@@ -101,7 +109,7 @@ def mle_fit_psycho(data, P_model='weibull', parstart=None, parmin=None, parmax=N
     return pars[iBestFit, :], L
 
 
-def neg_likelihood(pars, data, P_model='weibull', parmin=None, parmax=None):
+def neg_likelihood(pars, data, P_model="weibull", parmin=None, parmax=None):
     """
     Negative likelihood of a psychometric function.
     Args:
@@ -134,19 +142,19 @@ def neg_likelihood(pars, data, P_model='weibull', parmin=None, parmax=None):
     if isinstance(data, (list, tuple)):
         data = np.array(data)
     elif not isinstance(data, np.ndarray):
-        raise TypeError('data must be a list or numpy array')
+        raise TypeError("data must be a list or numpy array")
 
     if parmin is None:
-        parmin = np.array([.005, 0., 0.])
+        parmin = np.array([0.005, 0.0, 0.0])
     if parmax is None:
-        parmax = np.array([.5, 10., .25])
+        parmax = np.array([0.5, 10.0, 0.25])
 
     if data.shape[0] == 3:
         xx = data[0, :]
         nn = data[1, :]
         pp = data[2, :]
     else:
-        raise ValueError('data must be m by 3 matrix')
+        raise ValueError("data must be m by 3 matrix")
 
     # here is where you effectively put the constraints.
     if (any(pars < parmin)) or (any(pars > parmax)):
@@ -154,24 +162,27 @@ def neg_likelihood(pars, data, P_model='weibull', parmin=None, parmax=None):
         return l
 
     dispatcher = {
-        'weibull': weibull,
-        'weibull50': weibull50,
-        'erf_psycho': erf_psycho,
-        'erf_psycho_2gammas': erf_psycho_2gammas
+        "weibull": weibull,
+        "weibull50": weibull50,
+        "erf_psycho": erf_psycho,
+        "erf_psycho_2gammas": erf_psycho_2gammas,
     }
     try:
         probs = dispatcher[P_model](pars, xx)
     except KeyError:
-        raise ValueError('invalid model, options are "weibull", ' +
-                         '"weibull50", "erf_psycho" and "erf_psycho_2gammas"')
+        raise ValueError(
+            'invalid model, options are "weibull", '
+            + '"weibull50", "erf_psycho" and "erf_psycho_2gammas"'
+        )
 
-    assert (max(probs) <= 1) or (min(probs) >= 0), 'At least one of the probabilities is not ' \
-                                                   'between 0 and 1'
+    assert (max(probs) <= 1) or (min(probs) >= 0), (
+        "At least one of the probabilities is not " "between 0 and 1"
+    )
 
     probs[probs == 0] = np.finfo(float).eps
     probs[probs == 1] = 1 - np.finfo(float).eps
 
-    l = - sum(nn * (pp * np.log(probs) + (1 - pp) * np.log(1 - probs)))
+    l = -sum(nn * (pp * np.log(probs) + (1 - pp) * np.log(1 - probs)))
     return l
 
 
@@ -193,13 +204,13 @@ def weibull(pars, xx):
     """
     # Validate input
     if not isinstance(pars, (list, tuple, np.ndarray)):
-        raise TypeError('pars must be list-like or numpy array')
+        raise TypeError("pars must be list-like or numpy array")
 
     if len(pars) != 3:
-        raise ValueError('pars must be of length 3')
+        raise ValueError("pars must be of length 3")
 
     alpha, beta, gamma = pars
-    return (1 - gamma) - (1 - 2*gamma) * np.exp(-((xx / alpha)**beta))
+    return (1 - gamma) - (1 - 2 * gamma) * np.exp(-((xx / alpha) ** beta))
 
 
 def weibull50(pars, xx):
@@ -219,13 +230,13 @@ def weibull50(pars, xx):
     """
     # Validate input
     if not isinstance(pars, (list, tuple, np.ndarray)):
-        raise TypeError('pars must be list-like or numpy array')
+        raise TypeError("pars must be list-like or numpy array")
 
     if len(pars) != 3:
-        raise ValueError('pars must be of length 3')
+        raise ValueError("pars must be of length 3")
 
     alpha, beta, gamma = pars
-    return (1 - gamma) - (.5 - gamma) * np.exp(-((xx / alpha) ** beta))
+    return (1 - gamma) - (0.5 - gamma) * np.exp(-((xx / alpha) ** beta))
 
 
 def erf_psycho(pars, xx):
@@ -251,10 +262,10 @@ def erf_psycho(pars, xx):
     """
     # Validate input
     if not isinstance(pars, (list, tuple, np.ndarray)):
-        raise TypeError('pars must be list-like or numpy array')
+        raise TypeError("pars must be list-like or numpy array")
 
     if len(pars) != 3:
-        raise ValueError('pars must be of length 4')
+        raise ValueError("pars must be of length 4")
 
     (bias, slope, gamma) = pars
     return gamma + (1 - 2 * gamma) * (erf((xx - bias) / slope) + 1) / 2
@@ -283,10 +294,10 @@ def erf_psycho_2gammas(pars, xx):
     """
     # Validate input
     if not isinstance(pars, (list, tuple, np.ndarray)):
-        raise TypeError('pars must be a list-like or numpy array')
+        raise TypeError("pars must be a list-like or numpy array")
 
     if len(pars) != 4:
-        raise ValueError('pars must be of length 4')
+        raise ValueError("pars must be of length 4")
 
     (bias, slope, gamma1, gamma2) = pars
     return gamma1 + (1 - gamma1 - gamma2) * (erf((xx - bias) / slope) + 1) / 2

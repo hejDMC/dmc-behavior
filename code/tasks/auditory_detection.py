@@ -1,4 +1,4 @@
-'''
+"""
 Auditory detection task with tone clouds
 
 
@@ -15,15 +15,15 @@ Aim:
         - increased ITI
 
     From Coen et al., 2021: the turning threshold for a decision was 30 degrees in wheel turning.
-'''
+"""
 
-#%% import modules
-import sounddevice as sd
 import time
-import random
+
+import sounddevice as sd
 from base_auditory_task import BaseAuditoryTask
 
-#%%
+# %%
+
 
 class AuditoryDetection(BaseAuditoryTask):
 
@@ -43,12 +43,16 @@ class AuditoryDetection(BaseAuditoryTask):
         super().__init__(data_io, exp_dir, procedure)
         start_time = time.time()
         self.time_out = start_time + self.TIME_LIMIT * self.SECONDS
-        self.time_out_low_trials = start_time + self.TIME_LIMIT_LOW_TRIALS * self.SECONDS
+        self.time_out_low_trials = (
+            start_time + self.TIME_LIMIT_LOW_TRIALS * self.SECONDS
+        )
 
-        self.turning_goal = self.task_prefs['encoder_specs']['target_degrees']
+        self.turning_goal = self.task_prefs["encoder_specs"]["target_degrees"]
 
         self.left_right = 0
-        self.tone_history = []  # list for keeping track of tone history, make sure to have same tone max 3x
+        self.tone_history = (
+            []
+        )  # list for keeping track of tone history, make sure to have same tone max 3x
         self.choice_hist = []
 
     def stage_checker(self):
@@ -73,7 +77,7 @@ class AuditoryDetection(BaseAuditoryTask):
         elif self.wheel_position < -self.turning_goal:
             self.left_right = "left"
             self.decision_var = "moved_wheel"
-            self.choice_hist.append(1) # one for moved wheel
+            self.choice_hist.append(1)  # one for moved wheel
         elif time.time() > timeout:
             self.left_right = "none"
             self.decision_var = "no_response"
@@ -83,11 +87,15 @@ class AuditoryDetection(BaseAuditoryTask):
 
     def check_trial_end(self):
         if time.time() > self.time_out:  # max length reach
-            mess = "60 min passed -- time limit reached, enter 'stop' and take out animal"
+            mess = (
+                "60 min passed -- time limit reached, enter 'stop' and take out animal"
+            )
             print(mess)
             self.ending_criteria = "max_time"
             self.stop = True
-        elif time.time() > self.time_out_low_trials:  # time_out_lt is minimum time (45 min), if animal disengages afterwards, take it out
+        elif (
+            time.time() > self.time_out_low_trials
+        ):  # time_out_lt is minimum time (45 min), if animal disengages afterwards, take it out
             self.disengage = self.check_disengage(self.choice_hist)
             if self.disengage:  # disengagement after > 45 min
                 mess = "animal is disengaged, please enter 'stop' and take out animal"
@@ -97,11 +105,18 @@ class AuditoryDetection(BaseAuditoryTask):
 
     def get_log_data(self):
         # always add one line to csv file upon event with timestamp for sync
-        return "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}\n".format(time.time(), str(self.trial_num), str(self.trial_start),
-                                                           str(self.TRIAL_ID), str(self.tone_played),
-                                                           str(self.decision_var), str(self.choice),
-                                                           str(self.left_right), str(self.reward_time),
-                                                           str(self.curr_iti))  # todo: 0: time_stamp, 1: trial_num, 2: trial_start, 3: trial_type:, 4: tone_played, 5: decision_variable, 6: choice_variable, 7: reward_time, 8: inter-trial-intervall
+        return "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}\n".format(
+            time.time(),
+            str(self.trial_num),
+            str(self.trial_start),
+            str(self.TRIAL_ID),
+            str(self.tone_played),
+            str(self.decision_var),
+            str(self.choice),
+            str(self.left_right),
+            str(self.reward_time),
+            str(self.curr_iti),
+        )  # todo: 0: time_stamp, 1: trial_num, 2: trial_start, 3: trial_type:, 4: tone_played, 5: decision_variable, 6: choice_variable, 7: reward_time, 8: inter-trial-intervall
 
     def execute_task(self):
         self.trial_start = 1
@@ -110,32 +125,49 @@ class AuditoryDetection(BaseAuditoryTask):
         self.tone_history.append(self.TRIAL_ID)
         self.cloud_bool = False
         while True:
-            self.animal_quiet, self.cloud = self.check_quiet_window()  # call the QW checker function, stay in function as long animal holds wheel still, otherwise return and call function again
-            if self.animal_quiet:  # if animal is quiet for quiet window length, ini new trial, otherwise stay in loop
+            self.animal_quiet, self.cloud = (
+                self.check_quiet_window()
+            )  # call the QW checker function, stay in function as long animal holds wheel still, otherwise return and call function again
+            if (
+                self.animal_quiet
+            ):  # if animal is quiet for quiet window length, ini new trial, otherwise stay in loop
                 self.animal_quiet = False
                 break
         timeout = time.time() + self.response_window
         self.trial_num += 1
         self.decision_var = False  # set decision variable to False for start of trial, and then in the loop check for decision
-        with sd.OutputStream(samplerate=self.stimulus_manager.fs, blocksize=len(self.cloud), channels=2, dtype='int16',
-                             latency='low', callback=self.callback):
-            time.sleep(self.stimulus_manager.cloud_duration * 2)  # to avoid zero shot trials, stream buffers 2x the cloud duration before tone onset
+        with sd.OutputStream(
+            samplerate=self.stimulus_manager.fs,
+            blocksize=len(self.cloud),
+            channels=2,
+            dtype="int16",
+            latency="low",
+            callback=self.callback,
+        ):
+            time.sleep(
+                self.stimulus_manager.cloud_duration * 2
+            )  # to avoid zero shot trials, stream buffers 2x the cloud duration before tone onset
             self.tone_played = 1
             self.logger.log_trial_data(self.get_log_data())
             self.tone_played = 0
             self.wheel_start_position = self.encoder_data.getValue()
             while True:
                 self.decision_var = self.calculate_decision(
-                    timeout)  # should stay False until either response window is over or animal moved the wheel
+                    timeout
+                )  # should stay False until either response window is over or animal moved the wheel
                 if self.decision_var == self.TARGET_POSITION:  # if choice was correct
                     self.cancel_audio = True
                     self.choice = "correct"
                     self.trial_stat[0] += 1
                     self.logger.log_trial_data(self.get_log_data())
                     if self.decision_var == "moved_wheel":  # reward only in go trials
-                        self.reward_system.trigger_reward(self.logger, self.PUMP_TIME_ADJUST)
+                        self.reward_system.trigger_reward(
+                            self.logger, self.PUMP_TIME_ADJUST
+                        )
                     break
-                elif self.decision_var == "no_response": # if choice was incorrect and variable is NOT False, trial was incorrect
+                elif (
+                    self.decision_var == "no_response"
+                ):  # if choice was incorrect and variable is NOT False, trial was incorrect
                     self.cancel_audio = True
                     self.choice = "incorrect"
                     self.trial_stat[1] += 1
@@ -151,4 +183,3 @@ class AuditoryDetection(BaseAuditoryTask):
         self.logger.log_trial_data(self.get_log_data())
         print(f"trial number: {self.trial_num} - correct trials: {self.trial_stat[0]}")
         self.check_trial_end()
-
