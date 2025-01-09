@@ -46,12 +46,6 @@ def start_option(device):
         d_b = input(question_str)
     return device_bool
 
-
-
-
-
-
-
 def plot_behavior_terminal(exp_dir, task_id):
     """
     Function to plot behavioral performance of animal after session in terminal

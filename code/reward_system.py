@@ -5,9 +5,9 @@ from data_io import DataIO
 # Reward System class for managing reward dispensing
 class RewardSystem:
     # todo have something here for pullup or pulldown
-    def __init__(self, animal_dir, task_type, droid_settings, task_prefs, first_day, stage):
-        self.animal_dir = animal_dir
-        self.data_io = DataIO(DataIO(self.animal_dir.parents[1], task_type, self.animal_dir.stem))
+    def __init__(self, data_io, task_type, droid_settings, task_prefs, first_day, stage):
+        self.data_io = data_io
+        self.animal_dir = data_io.animal_dir
         self.droid_settings = droid_settings
         self.task_prefs = task_prefs
         self.first_day = first_day
@@ -91,9 +91,11 @@ class RewardSystem:
         pump_duration = min(max(pump_duration, self._get_min_pump_duration()), self._get_max_pump_duration())
         return pump_duration
 
-    def trigger_reward(self, curr_pump_duration):
-        # todo call pump log
+    def trigger_reward(self, logger, pump_time_adjust):
         # todo check for adjusted pump times in 2AFC task
         GPIO.output(self.pump, GPIO.HIGH)
-        time.sleep(curr_pump_duration / 1000)
+        curr_pump_time = int(self.pump_time * pump_time_adjust)
+        logger.log_pump(curr_pump_time)
+        time.sleep(curr_pump_time / 1000)
         GPIO.output(self.pump, GPIO.LOW)
+

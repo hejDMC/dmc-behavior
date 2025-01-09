@@ -1,13 +1,7 @@
-import numpy as np
+
 import threading
-from sklearn import preprocessing
-import time
-import random
 import RPi.GPIO as GPIO
-import pandas as pd
 from utils.encoder import Encoder
-from utils.sync_pulse import Sync_Pulse
-from data_io import DataIO
 from logger import Logger
 from stimulus_manager import StimulusManager
 from reward_system import RewardSystem
@@ -16,14 +10,11 @@ from reward_system import RewardSystem
 class BaseAuditoryTask(threading.Thread):
     ENCODER_TO_DEGREE = 1024/360
     STAGE_0_TURNING_GOAL_ADJUST = 2
-    def __init__(self, animal_dir, task_type):
+    def __init__(self, data_io, exp_dir, task_type):
         threading.Thread.__init__(self)
-
-        self.animal_dir = animal_dir
+        self.data_io = data_io
+        self.animal_dir = self.data_io.path_manager.get_animal_dir()
         self.task_type = task_type
-
-        # todo: load path_manager?
-        self.data_io = DataIO(self.animal_dir.parents[1], self.task_type)
 
         self.droid_settings = self.data_io.load_droid_setting()
         self.task_prefs = self.data_io.load_task_prefs()
@@ -31,9 +22,10 @@ class BaseAuditoryTask(threading.Thread):
         self.stage = self.get_stage()
         self.stage_advance = False
 
-        self.exp_dir = None  # This can be set externally
+        self.exp_dir = exp_dir
 
         self.stop = False
+        self.ending_criteria = "manual"
 
         # Components used by all tasks
         self.stimulus_manager = StimulusManager(self.task_prefs, self.droid_settings)
@@ -51,6 +43,8 @@ class BaseAuditoryTask(threading.Thread):
         self.punish_amplitude = self.task_prefs['task_prefs']['punishment_sound_amplitude']
 
         # other task params
+        self.target_position = None
+        self.wheel_start_position = None
         self.iti = self.task_prefs['task_prefs']['inter_trial_interval']
         self.response_window = self.task_prefs['task_prefs']['response_window']
 
@@ -68,15 +62,15 @@ class BaseAuditoryTask(threading.Thread):
         self.animal_quiet = True
 
 
-        self.logger = Logger(animal_dir, self.exp_dir)
+        self.logger = Logger(self.animal_dir, self.exp_dir)
 
         # Set GPIO mode
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
 
         # data logging
-        self.trial_data_fn = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
-        self.tone_cloud_fn = exp_dir.joinpath(f'{get_today()}_tone_cloud_data.csv')
+        self.trial_data_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_trial_data.csv')
+        self.tone_cloud_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_tone_cloud_data.csv')
         self.trial_num = 0
         self.trial_stat = [0, 0, 0]  # number of [correct, incorrect, omission] trials
         self.trial_start = 0

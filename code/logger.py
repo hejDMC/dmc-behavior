@@ -2,11 +2,10 @@ import time
 
 # Logger class for logging experimental data
 class Logger:
-    def __init__(self, animal_dir, exp_dir):
-        self.animal_dir = animal_dir
+    def __init__(self, data_io, exp_dir):
         self.exp_dir = exp_dir
-        self.trial_data_fn = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
-        self.pump_log = exp_dir.joinpath(f'{get_today()}_pump_data.csv')
+        self.trial_data_fn = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_trial_data.csv')
+        self.pump_log = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_pump_data.csv')
 
     def log_trial_data(self, trial_info):
         with open(self.trial_data_fn, "a") as log:

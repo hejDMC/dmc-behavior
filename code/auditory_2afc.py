@@ -20,32 +20,40 @@ Aim:
 '''
 
 #%% import modules
-import RPi.GPIO as GPIO
-import sys, socket
 import numpy as np
 import pandas as pd
 import sounddevice as sd
 import time
 import random
-import threading
-from datetime import datetime
-from sklearn import preprocessing
 from utils.encoder import Encoder
-from utils.sync_pulse import Sync_Pulse
 from base_auditory_task import BaseAuditoryTask
-from reader_writers import TriggerPulse, RotaryRecorder, SyncRecorder
-from path_manager import PathManager
-from data_io import DataIO
 from auditory_2afc_helpers import StageChecker, BiasCorrectionHandler
 
 #%%
-
-# Example of a Task Specific Class using the Base Class
 class Auditory2AFC(BaseAuditoryTask):
     DECISION_SD = 0.5
     MIN_TRIAL_DEBIAS = 10
-    def __init__(self, procedure, animal_dir):
-        super().__init__(procedure, animal_dir)
+    TIME_LIMIT = 90
+    TIME_LIMIT_LOW_TRIALS = 45
+    LOW_TRIAL_NUM = 350
+    SECONDS = 60
+
+    MIN_CORRECT_HISTORY = 3
+    DEBIASING_STAGE_THRESHOLD = 4
+
+    NO_BIAS_PROB = 0.5
+    HIGH_PROB_STAGE_5_BLOCK_NEG = 0.2
+    HIGH_PROB_STAGE_5_BLOCK_POS = 0.8
+    NO_BIAS_TRIALS_STAGE_5 = 90
+
+    def __init__(self, data_io, exp_dir, procedure):
+        super().__init__(data_io, exp_dir, procedure)
+
+        start_time = time.time()
+        self.time_out = start_time + self.TIME_LIMIT * self.SECONDS
+        self.time_out_low_trials = start_time + self.TIME_LIMIT_LOW_TRIALS * self.SECONDS
+
+        self.response_matrix, self.pre_reversal = data_io.load_response_matrix()
         self.turning_goal = self.droid_settings['base_params']['turning_goal']
         self.encoder_data = Encoder(self.droid_settings['pin_map']['IN']['encoder_left'],
                                     self.droid_settings['pin_map']['IN']['encoder_right'])
@@ -71,8 +79,8 @@ class Auditory2AFC(BaseAuditoryTask):
         self.disengage = False
         self.reaction_times = []
         # stop boolean - entered in terminal to terminate session
-        self.stop = False
-        self.ending_criteria = "manual"
+
+
 
     def get_trial(self):
         """
@@ -81,25 +89,21 @@ class Auditory2AFC(BaseAuditoryTask):
             str: The trial ID ('high' or 'low').
         """
         # Constants for easier adjustment
-        NO_BIAS_PROB = 0.5
-        HIGH_PROB_STAGE_5_BLOCK_NEG = 0.2
-        HIGH_PROB_STAGE_5_BLOCK_POS = 0.8
-        NO_BIAS_TRIALS_STAGE_5 = 90
 
         if self.stage < 5:
             # Stage < 5: Random choice, no bias
-            self.trial_id = 'high' if random.random() < NO_BIAS_PROB else 'low'
+            self.trial_id = 'high' if random.random() < self.NO_BIAS_PROB else 'low'
 
         elif self.stage == 5:
             # Stage 5 logic
-            if self.trial_num <= NO_BIAS_TRIALS_STAGE_5:
+            if self.trial_num <= self.NO_BIAS_TRIALS_STAGE_5:
                 # First 90 trials, no bias
-                if self.trial_num == NO_BIAS_TRIALS_STAGE_5:
+                if self.trial_num == self.NO_BIAS_TRIALS_STAGE_5:
                     self.get_block()  # Set up the block after first 90 trials
-                self.trial_id = 'high' if random.random() < NO_BIAS_PROB else 'low'
+                self.trial_id = 'high' if random.random() < self.NO_BIAS_PROB else 'low'
             else:
                 # After 90 trials, follow block bias
-                high_prob = HIGH_PROB_STAGE_5_BLOCK_NEG if self.block == -1 else HIGH_PROB_STAGE_5_BLOCK_POS
+                high_prob = self.HIGH_PROB_STAGE_5_BLOCK_NEG if self.block == -1 else self.HIGH_PROB_STAGE_5_BLOCK_POS
                 self.trial_id = 'high' if random.random() < high_prob else 'low'
 
                 # Increment block counter and switch block if needed
@@ -121,18 +125,15 @@ class Auditory2AFC(BaseAuditoryTask):
             str: The trial ID ('high' or 'low').
         """
 
-        # Constants for improved readability
-        MIN_CORRECT_HISTORY = 3
-        DEBIASING_STAGE_THRESHOLD = 4
         # Stage 0: Handle initial learning stage
         if self.stage == 0:
-            if len(self.correct_hist) < MIN_CORRECT_HISTORY:
+            if len(self.correct_hist) < self.MIN_CORRECT_HISTORY:
                 # Repeat the last trial if fewer than 3 trials have occurred
                 self.trial_id = self.last_trial
             else:
                 # Check the last three trials
-                corr_sum = np.sum(self.correct_hist[-MIN_CORRECT_HISTORY:])
-                if corr_sum == MIN_CORRECT_HISTORY:  # If the last three trials were all correct, switch trial
+                corr_sum = np.sum(self.correct_hist[-self.MIN_CORRECT_HISTORY:])
+                if corr_sum == self.MIN_CORRECT_HISTORY:  # If the last three trials were all correct, switch trial
                     self.correct_hist = []  # Reset history
                     self.trial_id = 'low' if self.last_trial == 'high' else 'high'
                 else:
@@ -140,7 +141,7 @@ class Auditory2AFC(BaseAuditoryTask):
                     self.trial_id = self.last_trial
 
         # Stages 1-3: Apply debiasing if necessary, otherwise get trial
-        elif 0 < self.stage < DEBIASING_STAGE_THRESHOLD:
+        elif 0 < self.stage < self.DEBIASING_STAGE_THRESHOLD:
             if self.choice == "incorrect" and self.trial_num > self.MIN_TRIAL_DEBIAS:
                 # Apply debiasing if previous trial was incorrect
                 self.trial_id = self.debias()
@@ -163,7 +164,7 @@ class Auditory2AFC(BaseAuditoryTask):
         hist_mean = np.mean(hist_list)
         debias_val = random.gauss(hist_mean, self.DECISION_SD)
         bias_side = 'right' if debias_val > 0 else 'left'
-        tone = list(response_matrix.keys())[list(response_matrix.values()).index(bias_side)]
+        tone = list(self.response_matrix.keys())[list(self.response_matrix.values()).index(bias_side)]
         self.trial_id = 'low' if tone == 'high' else 'high'
 
         return self.trial_id
@@ -183,12 +184,12 @@ class Auditory2AFC(BaseAuditoryTask):
 
         # continously stream the wheel_position --> if it crosses threshold (30 degree) mark choice as left/right; otherwise it's "undecided"
         # right turns are positive and left turns are negative --> depends on how you wire the encoder
-        self.current_position = self.encoder_data.getValue()
+        current_position = self.encoder_data.getValue()
         # self.rotary_logger(self.current_position)
-        self.wheel_position = self.current_position - self.wheel_start_position
-        if self.wheel_position > self.turning_goal:
+        wheel_position = current_position - self.wheel_start_position
+        if wheel_position > self.turning_goal:
             self.decision_var = "right"
-        elif self.wheel_position < -self.turning_goal:
+        elif wheel_position < -self.turning_goal:
             self.decision_var = "left"
         else:
             self.decision_var = "undecided"
@@ -197,7 +198,7 @@ class Auditory2AFC(BaseAuditoryTask):
 
     def choice_evaluation(self):#, trial_id):
 
-        self.decision_var = self.calculate_decision() #self.wheel_position, self.turning_goal) # get the decision from continous stream
+        self.decision_var = self.calculate_decision()
         if self.decision_var == "undecided":
             self.choice = "undecided"
             # pass
@@ -208,19 +209,19 @@ class Auditory2AFC(BaseAuditoryTask):
         return self.decision_var, self.choice
 
     def check_trial_end(self):
-        if time.time() > time_out:  # max length reach
+        if time.time() > self.time_out:  # max length reach
             mess = "90 min passed -- time limit reached, enter 'stop' and take out animal"
             print(mess)
             self.ending_criteria = "max_time"
             self.stop = True
-        elif time.time() > time_out_lt and task.trial_num < low_trial_lim:  # low trial number in first 45 min
+        elif time.time() > self.time_out_low_trials and self.trial_num < self.LOW_TRIAL_NUM:  # low trial number in first 45 min
             mess = "low number of trials, enter 'stop' and take out animal"
             print(mess)
             self.ending_criteria = "low_trial_num"
 
             self.stop = True
         # check disengagement
-        if time.time() > time_out_lt and self.trial_num > low_trial_lim:
+        if time.time() > self.time_out_low_trials and self.trial_num > self.LOW_TRIAL_NUM:
             self.disengage = self.check_disengage()
             if self.disengage:  # disengagement after > 45 min
                 mess = "animal is disengaged, please enter 'stop' and take out animal"
@@ -229,37 +230,29 @@ class Auditory2AFC(BaseAuditoryTask):
                 self.stop = True
 
     def play_tone(self, tone, duration, amplitude):
-        audio = self.stimulus_manager.create_tone(self.fs, int(tone), duration, amplitude)
+        audio = self.stimulus_manager.create_tone(self.stimulus_manager.fs, int(tone), duration, amplitude)
         # print(str(tone))
-        sd.play(audio, self.fs, blocking=True)
+        sd.play(audio, self.stimulus_manager.fs, blocking=True)
 
     def callback(self, outdata, frames, time, status):
         # callback function for audio stream
         if self.cancel_audio:
             raise sd.CallbackStop()
         outdata[:] = np.column_stack((self.cloud, self.cloud))  # two channels
-    def execute_task(self):
-        # Example implementation for 2AFC task
-        trial_id = random.choice(['high', 'low'])
-        if trial_id == 'high':
-            cloud = self.stimulus_manager.create_tone_cloud(tgt_octave=2, stim_strength=80)
-        else:
-            cloud = self.stimulus_manager.create_tone_cloud(tgt_octave=0, stim_strength=80)
-        # ... More logic for the specific trial
 
     def check_stage(self):
         # Logic for checking stage progression
-        self.stage_checker = StageChecker(self.animal_dir, self.stage, trial_stat, trial_num,
-                                         decision_history, correct_hist)
+        self.stage_checker = StageChecker(self.stage, self.trial_stat, self.trial_num, self.decision_history,
+                                          self.correct_hist, self.animal_dir)
         self.stage_advance = self.stage_checker.check_stage()
 
     def adjust_pump_duration(self):
         if self.decision_var == self.bias_correction and self.bias_counter <= self.bias_counter_max:  # if the animal choose anti-bias side, give more reward
-            curr_pump_duration = int(self.pump_duration * 2)
+            pump_time_adjust = 2
             self.bias_counter += 1  # only reward first x trials with higher volume
         else:
-            curr_pump_duration = int(self.pump_duration)
-        return curr_pump_duration
+            pump_time_adjust = 1
+        return pump_time_adjust
 
     def get_block(self):
 
@@ -331,82 +324,92 @@ class Auditory2AFC(BaseAuditoryTask):
             time.sleep(0.001)  # 1 ms sleep, otherwise some threading issue occur
         return self.animal_quiet, self.cloud
 
-task = None
-sync_rec = None
-camera = None
-rotary = None
-exp_dir_create = False
-droid = socket.gethostname()
-task_type = "auditory_2afc"
+    def get_log_data(self):
+        return "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}\n".format(time.time(), str(self.trial_num),
+                                                                 str(self.trial_start), str(self.trial_id),
+                                                                 str(self.curr_stim_strength), str(self.tone_played),
+                                                                 str(self.decision_var), str(self.choice),
+                                                                 str(self.reward_time), str(self.curr_iti),
+                                                                 str(self.block))  # todo: 0: time_stamp, 1: trial_num, 2: trial_start, 3: trial_type:, 4: tone_played, 5: decision_variable, 6: choice_variable, 7: reward_time, 8: inter-trial-intervall, 10: block
+    def execute_task(self):
+        # Example implementation for 2AFC task
+        self.trial_start = 1
+        self.logger.log_trial_data(self.get_log_data())
+        self.trial_start = 0
+        if self.trial_num == 0:  # for first trial of session, randomly choose "last" trial, only for init of task
+            self.last_trial = self.get_trial()
 
-# get the animal id and load the response matrix
-animal_id = input("enter the mouse ID:")
+        self.trial_id = self.get_trial_id()  # I put this hear as computing the cloud takes some 250 ms
+        self.cloud_bool = False
 
-experimenter = input("who is running the experiment?")
+        while True:
+            self.animal_quiet, self.cloud = self.check_quiet_window()  # call the QW checker function, stay in function as long animal holds wheel still, otherwise return and call function again
+            if self.animal_quiet:  # if animal is quiet for quiet window length, ini new trial, otherwise stay in loop
+                trial_start = time.time()
+                self.animal_quiet = False
+                break
 
-hour_format = "%H:%M:%S"
-start_time = datetime.now().strftime(hour_format)
+        self.target_position = self.response_matrix[self.trial_id]
+        timeout = time.time() + self.response_window  # start a timer at the size of the response window
+        self.trial_num += 1
 
-response_matrix, pre_reversal = load_response_matrix(animal_id)
+        with sd.OutputStream(samplerate=self.stimulus_manager.fs, blocksize=len(self.cloud), channels=2, dtype='int16',
+                             latency='low', callback=self.callback):
+            time.sleep(self.stimulus_manager.tone_cloud_duration * 2)  # to avoid zero shot trials, stream buffers 2x the cloud duration before tone onset
+            self.tone_played = 1
+            self.logger.log_trial_data(self.get_log_data())
+            self.tone_played = 0
+            self.wheel_start_position = self.encoder_data.getValue()
+            while True:
+                self.decision_var, self.choice = self.choice_evaluation()
+                if self.choice == "correct":  # if choice was correct
+                    self.cancel_audio = True
+                    self.trial_stat[0] += 1
+                    self.logger.log_trial_data(self.get_log_data())
+                    self.reaction_times.append(time.time() - trial_start)
+                    self.reward_time = 1
+                    pump_time_adjust = self.adjust_pump_duration()
+                    self.logger.log_trial_data(self.get_log_data())
+                    self.reward_system.trigger_reward(self.logger, pump_time_adjust)
+                    self.reward_time = 0
+                    if self.target_position == 'right':
+                        self.decision_history.append(1)
+                    else:
+                        self.decision_history.append(-1)
+                    self.correct_hist.append(1)
+                    break
+                elif self.choice == "incorrect":  # if choice was incorrect
+                    self.cancel_audio = True
+                    self.trial_stat[1] += 1
+                    self.logger.log_trial_data(self.get_log_data())
+                    self.reaction_times.append(time.time() - trial_start)
+                    if self.target_position == 'right':
+                        self.decision_history.append(-1)
+                    else:
+                        self.decision_history.append(1)
+                    self.correct_hist.append(0)
+                    break
+                elif time.time() > timeout:  # omission trials: no response in response window
+                    self.cancel_audio = True
+                    self.trial_stat[2] += 1
+                    self.logger.log_trial_data(self.get_log_data())
+                    self.reaction_times.append(time.time() - trial_start)
+                    self.decision_history.append(0)
+                    self.correct_hist.append(0)
+                    break
+        if self.choice == "correct":
+            self.curr_iti = self.iti[0]
+        elif self.choice == "incorrect":
+            self.play_tone(self.punish_sound, self.punish_duration, self.punish_amplitude)
+            self.curr_iti = self.iti[1] * 2  # if incorrect, add 3 sec punishment timeout
+        else:
+            self.play_tone(self.punish_sound, self.punish_duration, self.punish_amplitude)
+            self.curr_iti = self.iti[1]  # if omission, add 1.5 sec punishment timeout
 
-# booleans to set if you want to trigger camera/record sync pulses from 2p
-sync_bool = False
-camera_bool = False
+        self.last_trial = self.trial_id  # only for stage 0
+        self.cancel_audio = False
+        time.sleep(self.curr_iti)  # inter-trial-interval
+        self.logger.log_trial_data(self.get_log_data())
+        print(f"trial number: {self.trial_num} - correct trials: {self.trial_stat[0]}")
+        self.check_trial_end()
 
-# define session ending criteria todo fix this numbers here
-# 1. time_out = session > 90 min
-start_time_diff = time.time()  # for calculating timeout, was to lazy to figure out, how to do it with datetime moduel..
-time_limit = 90  # time_limit in min
-time_out = start_time_diff + (time_limit * 60)
-
-# 2. Low number of trials - > 45 min && < 300 trials (irrespective of performance)
-time_limit_lt = 45  # in min, time_limit low trials
-time_out_lt = start_time_diff + (time_limit_lt * 60)
-low_trial_lim = 350
-
-
-while True:
-    command = input("Enter 'start' to begin:")
-    if command == "start":
-        if not exp_dir_create:
-            animal_dir = check_dir(animal_id)
-            exp_dir = make_exp_dir(animal_dir)
-            exp_dir_create = True
-        task = Auditory2AFC()
-        rotary = RotaryRecorder()
-        if sync_bool:
-            sync_rec = SyncRecorder()
-        if camera_bool:
-            camera = TriggerPulse()
-        task.start()
-        rotary.start()
-        if sync_bool:
-            sync_rec.start()
-        if camera_bool:
-            camera.start()
-
-    if command == "stop":
-        ending_criteria = task.ending_criteria
-        task.check_stage()
-        task.stop = True
-        rotary.stop = True
-        if sync_bool:
-            sync_rec.stop = True
-        if camera_bool:
-            camera.stop = True
-        # GPIO.cleanup()
-        end_time = datetime.now().strftime(hour_format) # not the real endtime, but the time of entering "stop"
-        store_meta_data(animal_id, droid, start_time, end_time, exp_dir, task, sync_bool, camera_bool,
-                        ending_criteria=ending_criteria, procedure=procedure, pre_reversal=pre_reversal,
-                        experimenter=experimenter)
-        store_reaction_times(exp_dir, task)
-        store_pref_data(exp_dir, procedure=procedure)
-        task.join()
-        rotary.join()
-        if sync_bool:
-            sync_rec.join()
-        if camera_bool:
-            camera.join()
-        plot_behavior_terminal(exp_dir, procedure)  # plot behavior in terminal
-        print("ending_criteria: " + ending_criteria)
-        sys.exit()

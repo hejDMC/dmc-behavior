@@ -1,10 +1,11 @@
 import json
 import pandas as pd
 from pathlib import Path
-from path_manager import PathManager
+
 
 class DataIO:
-    def __init__(self, base_dir: Path, task_type: str, animal_id: str):
+    DROID_SETTINGS = 'droid_settings'
+    def __init__(self, path_manager, task_type: str):
         """
         Initialize with a base directory and task type.
         Parameters:
@@ -12,16 +13,14 @@ class DataIO:
             task_type (str): The type of task for this handler.
             animal_id (str): ID of the animal.
         """
-        self.base_dir = base_dir
-        self.path_manager = PathManager(self.base_dir)
+        self.path_manager = path_manager
         self.task_type = task_type
-        # self.animal_id = animal_id
-        self.animal_dir = self.path_manager.check_dir(animal_id)
+        self.animal_dir = self.path_manager.check_dir()
 
 
     def load_droid_setting(self) -> dict:
         """Load droid settings from a JSON file."""
-        droid_prefs_path = self.base_dir.joinpath('droid_settings', 'droid_prefs.json')
+        droid_prefs_path = self.path_manager.base_dir.joinpath(self.DROID_SETTINGS, 'droid_prefs.json')
         if droid_prefs_path.exists():
             with open(droid_prefs_path, 'r') as f:
                 return json.load(f)
@@ -31,7 +30,7 @@ class DataIO:
 
     def load_task_prefs(self) -> dict:
         """Load task preferences for a given task type."""
-        task_prefs_path = self.base_dir.joinpath('droid_settings', f'{self.task_type}_prefs.json')
+        task_prefs_path = self.path_manager.base_dir.joinpath(self.DROID_SETTINGS, f'{self.task_type}_prefs.json')
         if task_prefs_path.exists():
             with open(task_prefs_path, 'r') as f:
                 return json.load(f)
@@ -41,7 +40,7 @@ class DataIO:
 
     def load_pump_calibration(self) -> int:
         """Load the most recent pump calibration value."""
-        pump_cali_dir = self.base_dir.joinpath('data', 'pump_calibration')  # directory with stored pump calibration data
+        pump_cali_dir = self.path_manager.base_dir.joinpath('data', 'pump_calibration')  # directory with stored pump calibration data
         try:
             pump_cali_fn = sorted([f for f in pump_cali_dir.glob('*.json')])[-1]  # load last, most recent file
             with open(pump_cali_fn, 'r') as fn:
