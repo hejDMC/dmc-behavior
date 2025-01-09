@@ -15,7 +15,7 @@ pi@<nameofpi> ~ $
 ```
 - cd into the *DMC-Behavior* directory, activate the venv and set GPIO pin 4 to high (just to be sure...):
 ```
-cd 2p-behavior
+cd dmc-behavior
 source ./venv/bin/activate
 raspi-gpio set 4 op dh
 ```
@@ -25,7 +25,7 @@ raspi-gpio set 4 op dh
 - a *response matrix* is unique file for each mouse linking stimuli to responses. E.g. for the auditory 2AFC task animals it needs to be set to which side (left/right) animals need turn the wheel when either high or low tone clouds are presented to obtain rewards for correct choices.
 - for creating the `response_matrix` file, run the following script (or use the alias if one was created previously, see the *DMC-Behavior-Platform_Software-installation* guide):
 ```
-python code/create-response-matrix.py
+python code/create_response_matrix.py
 ```
 - you will be prompted to enter the *animal_id* of the animal in question (confirm by pressing `Enter`) and the task the animal is going to perform (confirm by pressing `Enter`) the animal will be randomly assigned to a group (e.g. high tone clouds-right turn/low tone clouds-left turns or vice versa for the auditory 2AFC taks):
 ```
