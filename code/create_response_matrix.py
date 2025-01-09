@@ -7,16 +7,19 @@ Randomized assignment of animals to either first start high tone-turn wheel left
 import os
 import random
 import json
+from pathlib import Path
 
-from utils.utils import check_dir
+from path_manager import PathManager
+from data_io import DataIO
 
 
 # get the animal id
 animal_id = input("enter the animal ID:")
-animal_dir = check_dir(animal_id)
 
 task_list = ['2afc', 'gonogo', 'detection']
 task = input("enter the task:")
+path_manager = PathManager((Path(__file__).parent / '../../data').resolve(), animal_id)
+data_io = DataIO(path_manager, task)
 while True:
     if task in task_list:
         break
