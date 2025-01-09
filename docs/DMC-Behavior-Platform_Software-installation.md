@@ -164,10 +164,10 @@ source .bashrc
 - an example could look like this:
 ```
 alias rm='python code/create_response_matrix.py'
-alias habi='python code/habituation_auditory_tasks.py'
-alias 2afc='python code/run_auditory_2afc.py'
+alias habi='python code/run_habituation.py'
+alias training='python code/run_training.py'
 ```
-- the first alias (`rm`) will run the script to create a response matrix for an animal, the second alias (`habi`) will run the script for habituation protocol for an animal and the last alias (`2afc`) will run the script for the auditory 2AFC task (see the *DMC-Behavior-Platform_Day-to-day-operation* guide for details)
+- the first alias (`rm`) will run the script to create a response matrix for an animal, the second alias (`habi`) will run the script for habituation protocol for an animal and the last alias (`training`) will run the script for training the animal (see the *DMC-Behavior-Platform_Day-to-day-operation* guide for details)
 ## Known issues
 - sometimes the `sounddevices` packages lacks the following packages, which can you can install by:
 ```

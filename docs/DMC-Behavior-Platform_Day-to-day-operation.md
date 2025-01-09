@@ -44,7 +44,7 @@ ls data/<animal_id>
 - firstly, animals need to be habituated to being head-fixed, the auditory stimuli used and need learn to consume liquid rewards
 - for this, we run the `habituation` script by either running the script directly or use the alias if one was created previously (see the *DMC-Behavior-Platform_Software-installation* guide):
 ```
-python code/habituation_auditory_tasks>.py
+python code/run_habituation.py
 ```
 - you will be prompted to enter the *animal_id*, name of the experimenter, the task and day of the habituation (confirm by pressing `Enter`):
 ```
@@ -63,11 +63,12 @@ data/<animal_id>/<YYYYMMDD>/<HHMMSS>
 - after the habituation procedure is completed, the actual training can begin (training progression in staged protocols will be tracked automatically)
 - for this, run the `training` script by either running the script directly or use the alias if one was created previously (see the *DMC-Behavior-Platform_Software-installation* guide):
 ```
-python code/<training-script>.py
+python code/run_training.py
 ```
 - you will be prompted to enter the *animal_id* and name of the experimenter (confirm by pressing `Enter`):
 ```
 enter the mouse ID:<animal_id>
+enter the task:<task>
 who is running the experiment?<name-experimenter>
 ```
 - if the information is correct and you are ready to commence, enter `start` and press `Enter`:

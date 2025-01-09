@@ -1,19 +1,39 @@
-import sys, socket, time
+import sys, socket
 from datetime import datetime
 from pathlib import Path
 
 from tasks.managers.path_manager import PathManager
 from tasks.managers.data_io import DataIO
-from tasks.auditory_2afc import Auditory2AFC
 from tasks.managers.reader_writers import RotaryRecorder, SyncRecorder, TriggerPulse
 from tasks.managers.utils.utils import plot_behavior_terminal
 
 task, sync_rec, camera, rotary, exp_dir = None, None, None, None, None
 droid = socket.gethostname()
-task_type = "auditory_2afc"
+
+task_list = ['2afc', 'gonogo', 'detection']
+task_dict = {
+    'auditory_2afc': 'Auditory2AFC',
+    'auditory_gonogo': 'AuditoryGoNoGo',
+    'auditory_detection': 'AuditoryDetection'
+}
 
 # get the animal id and load the response matrix
 animal_id = input("enter the mouse ID:")
+
+input_task = input("enter the task:")
+while True:
+    if input_task in task_list:
+        task_type = f'auditory_{task}'
+        task_class_name = task_dict[task_type]
+        break
+    else:
+        print("please enter one of the following names:")
+        print(*task_list, sep=', ')
+    task = input("enter the task:")
+
+module = __import__(f"tasks.{task_type}", fromlist=[task_class_name])
+TaskClass = getattr(module, task_class_name)
+print(f"Successfully loaded {task_class_name} task.")
 
 experimenter = input("who is running the experiment?")
 
@@ -35,7 +55,7 @@ while True:
         if not exp_dir:
             animal_dir = path_manager.check_dir()
             exp_dir = path_manager.make_exp_dir()
-        task = Auditory2AFC(data_io, exp_dir, task_type)
+        task = TaskClass(data_io, exp_dir, task_type)
         rotary = RotaryRecorder(path_manager, exp_dir, task_type)
         if sync_bool:
             sync_rec = SyncRecorder(path_manager, exp_dir, task_type)
@@ -70,6 +90,6 @@ while True:
             sync_rec.join()
         if camera_bool:
             camera.join()
-        plot_behavior_terminal(data_io, exp_dir)  # plot behavior in terminal todo fix this function later
+        plot_behavior_terminal(data_io, exp_dir)  # plot behavior in terminal
         print("ending_criteria: " + ending_criteria)
         sys.exit()
