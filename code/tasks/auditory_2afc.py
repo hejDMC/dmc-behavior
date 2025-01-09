@@ -32,6 +32,7 @@ from auditory_2afc_helpers import StageChecker, BiasCorrectionHandler
 class Auditory2AFC(BaseAuditoryTask):
     DECISION_SD = 0.5
     MIN_TRIAL_DEBIAS = 10
+
     TIME_LIMIT = 90
     TIME_LIMIT_LOW_TRIALS = 45
     LOW_TRIAL_NUM = 350
@@ -65,17 +66,11 @@ class Auditory2AFC(BaseAuditoryTask):
         self.correct_hist = []  # history of correct trials for block structure in stage 0
         self.last_trial = 0
         self.decision_history = []  # list of choices 1 for right, -1 for left, 0 for undecided, average of 0 indicates no bias
-
-        self.cloud_bool = False
+        self.reaction_times = []
 
         self.block = 0  # only in stage 5
         self.block_length = 0
         self.block_counter = 0
-
-        # disengagement boolean
-        self.disengage = False
-        self.reaction_times = []
-        # stop boolean - entered in terminal to terminate session
 
 
 
@@ -166,16 +161,6 @@ class Auditory2AFC(BaseAuditoryTask):
 
         return self.trial_id
 
-    def check_disengage(self):
-        sess_median = pd.DataFrame(self.reaction_times).median()  # median of reaction times of session
-        roll_median = pd.DataFrame(self.reaction_times).rolling(20).median()  # rolling median (window=20) of reaction times
-        if (sess_median[0]*4) < roll_median.iloc[-1][0]:  # check if last roll_median is > 4x the session median todo check if this makes sense, or rather 3x
-            self.disengage = True  # set disengage bool to True
-        elif roll_median.iloc[-1][0] >= self.response_window:
-            self.disengage = True
-        else:
-            self.disengage = False  # can be reversed (for now..)
-        return self.disengage
 
     def calculate_decision(self):  #  , wheel_position, turning_goal):
 
@@ -219,23 +204,12 @@ class Auditory2AFC(BaseAuditoryTask):
             self.stop = True
         # check disengagement
         if time.time() > self.time_out_low_trials and self.trial_num > self.LOW_TRIAL_NUM:
-            self.disengage = self.check_disengage()
+            self.disengage = self.check_disengage(self.reaction_times)
             if self.disengage:  # disengagement after > 45 min
                 mess = "animal is disengaged, please enter 'stop' and take out animal"
                 print(mess)
                 self.ending_criteria = "disengagement"
                 self.stop = True
-
-    def play_tone(self, tone, duration, amplitude):
-        audio = self.stimulus_manager.create_tone(self.stimulus_manager.fs, int(tone), duration, amplitude)
-        # print(str(tone))
-        sd.play(audio, self.stimulus_manager.fs, blocking=True)
-
-    def callback(self, outdata, frames, time, status):
-        # callback function for audio stream
-        if self.cancel_audio:
-            raise sd.CallbackStop()
-        outdata[:] = np.column_stack((self.cloud, self.cloud))  # two channels
 
     def check_stage(self):
         # Logic for checking stage progression
@@ -265,61 +239,6 @@ class Auditory2AFC(BaseAuditoryTask):
             self.block_length = random.randrange(30, 70)
             self.block_counter = 0
             print(self.block_length)
-
-    def get_target_cloud(self):
-        """
-        Determine the current stimulus strength based on the stage, and create the corresponding tone cloud.
-
-        Returns:
-            The generated tone cloud.
-        """
-
-        # Define the selection logic for stimulus strengths based on stage
-        stage_selector = {
-            0: [self.stim_strength[0]],  # Stage 0, always 100
-            1: [self.stim_strength[0]],  # Stage 1, always 100
-            2: [self.stim_strength[0], self.stim_strength[1]],  # Stage 2, 100 or 80
-            3: [self.stim_strength[0], self.stim_strength[1], self.stim_strength[2]],  # Stage 3, 100, 80, or 70
-            4: [self.stim_strength[0], self.stim_strength[1], self.stim_strength[2], self.stim_strength[3]],  # Stage 4, 100, 80, 70 or 60
-            5: [self.stim_strength[0], self.stim_strength[1], self.stim_strength[2], self.stim_strength[3]]  # Stage 5, 100, 80, 70 or 60
-        }
-
-        if self.stage in stage_selector:
-            options = stage_selector[self.stage]
-        else:
-            print(f'Warning: Stage {self.stage} out of range (0-5), defaulting to stage 0')
-            options = stage_selector[0]  # default to stage 0
-
-        # Select the current stimulus strength randomly from options
-        self.curr_stim_strength = random.choice(options)
-
-        # Set octave based on trial type
-        self.tgt_octave = 2 if self.trial_id == 'high' else 0
-
-        # Create the tone cloud
-        self.cloud = self.stimulus_manager.create_tone_cloud(self.tgt_octave, self.curr_stim_strength)
-
-        return self.cloud
-    def check_quiet_window(self):
-
-        start_pos = self.encoder_data.getValue()  # start position of the wheel
-        q_w = self.quiet_window[0] + np.random.exponential(self.quiet_window[1])
-        if q_w > 1.5:
-            q_w = 1.5
-        quite_time = time.time() + q_w
-        while True:
-            curr_pos = self.encoder_data.getValue()
-            if not self.cloud_bool:
-                self.cloud = self.get_target_cloud()
-                self.cloud_bool = True
-            if curr_pos not in range(start_pos-self.quite_jitter, start_pos+self.quite_jitter):  # the curr_pos of the wheel is out of allowed range, exit and checker function will be called again
-                self.animal_quiet = False
-                break
-            elif time.time() > quite_time:  # if animal is still for QW, bool to True and exit --> trial will be initialized
-                self.animal_quiet = True
-                break
-            time.sleep(0.001)  # 1 ms sleep, otherwise some threading issue occur
-        return self.animal_quiet, self.cloud
 
     def get_log_data(self):
         return "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}\n".format(time.time(), str(self.trial_num),

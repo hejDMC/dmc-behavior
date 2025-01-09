@@ -9,6 +9,11 @@ from tasks.managers.utils.utils import plot_behavior_terminal
 
 task, sync_rec, camera, rotary, exp_dir = None, None, None, None, None
 droid = socket.gethostname()
+# comment these lines if you don't want to get questions asked
+# if droid == "bb8":
+#     sync_bool = start_option('sync_pulse')
+#     camera_bool = start_option('camera_trigger') # for bb8 comment this line too (for now) todo: check if you want ot change this
+
 
 task_list = ['2afc', 'gonogo', 'detection']
 task_dict = {

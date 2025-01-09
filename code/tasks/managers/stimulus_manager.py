@@ -48,7 +48,7 @@ class StimulusManager:
         oct_id = random.choices(population=[0, 1, 2], weights=weight_matrix)  # draw oct. for current tone
         return oct_id[0]
 
-    def create_tone(self, fs, frequency, tone_duration, amplitude):
+    def create_tone(self, frequency, tone_duration, amplitude):
         """
          Function to create tones; adapted from: https://github.com/int-brain-lab/iblrig/blob/master/iblrig/sound.py
         --> using ramping of to avoid onset artefacts
@@ -62,10 +62,10 @@ class StimulusManager:
         fade = 0.1  # as percentage of tone_duration --> 10 %
         fade_duration = tone_duration * fade  # sec
         #
-        tvec = np.linspace(0, tone_duration, int(tone_duration * fs))
+        tvec = np.linspace(0, tone_duration, int(tone_duration * self.fs))
         tone = amplitude * np.sin(2 * np.pi * frequency * tvec)  # tone vec
         #
-        len_fade = int(fade_duration * fs)
+        len_fade = int(fade_duration * self.fs)
         fade_io = np.hanning(len_fade * 2)
         fadein = fade_io[:len_fade]
         fadeout = fade_io[len_fade:]
@@ -75,7 +75,7 @@ class StimulusManager:
         #
         tone = tone * win
         ttl = np.ones(len(tone)) * 0.99
-        one_ms = round(fs / 1000) * 10
+        one_ms = round(self.fs / 1000) * 10
         ttl[one_ms:] = 0
         #
         if frequency == -1:
