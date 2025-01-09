@@ -1,22 +1,20 @@
 '''
-Auditory Go/NoGo task with tone clouds
+Auditory detection task with tone clouds
 
 
 Aim:
-    Animals are trained to perform an auditory (reversal) go/no-go task with tone clouds. Animals are randomly assigned
-    to one of two groups (either high or low tone clouds serves as go signal, this is changed after the reversal).
+    Animals are trained to perform an auditory detection task with tone clouds.
     Animals indicate responses by turning the wheel.
 
-    There are two types of correct trials:
-        - correct detection (wheel turn upon go cue) --> 5 ul 10 % sucrose reward is given
-        - correct rejection (no wheel turn upon no-go cue)
-    and two types of errors:
-        - false alarm (wheel turn upon no-go cue) --> white noise is played
-        - omission (no wheel turn upon go cue)
-        --> 1.5 sec timeout (i.e. increased ITI)
+    Correct trials (hits):
+        - wheel turns during response window after tone cloud onset to either direction
+        - 5 ul 10 % sucrose water is given as reward
+
+    Incorrect trials (misses):
+        - no wheel turns during response window after tone cloud onset
+        - increased ITI
 
     From Coen et al., 2021: the turning threshold for a decision was 30 degrees in wheel turning.
-
 '''
 
 #%% import modules
@@ -25,10 +23,9 @@ import time
 import random
 from base_auditory_task import BaseAuditoryTask
 
-
 #%%
 
-class AuditoryGoNoGo(BaseAuditoryTask):
+class AuditoryDetection(BaseAuditoryTask):
 
     STAGE_0_TRIAL_NUM = 150
 
@@ -39,13 +36,15 @@ class AuditoryGoNoGo(BaseAuditoryTask):
 
     PUMP_TIME_ADJUST = 1  # no intra-trial pump time adjustment
 
+    TARGET_POSITION = "moved_wheel"
+    TRIAL_ID = "middle"
+
     def __init__(self, data_io, exp_dir, procedure):
         super().__init__(data_io, exp_dir, procedure)
         start_time = time.time()
         self.time_out = start_time + self.TIME_LIMIT * self.SECONDS
         self.time_out_low_trials = start_time + self.TIME_LIMIT_LOW_TRIALS * self.SECONDS
 
-        self.response_matrix, self.pre_reversal = data_io.load_response_matrix()
         self.turning_goal = self.task_prefs['encoder_specs']['target_degrees']
 
         self.left_right = 0
@@ -59,20 +58,6 @@ class AuditoryGoNoGo(BaseAuditoryTask):
             if self.trial_stat[0] > self.STAGE_0_TRIAL_NUM:
                 self.stage_advance = True
                 print(">>>>>  FINISHED STAGE " + str(self.stage) + " !!! <<<<<<<<<")
-
-    def get_trial(self):
-        # randomly choose either high vs. low tone trial
-        if random.random() < 0.5:
-            self.trial_id = 'high'
-        else:
-            self.trial_id = 'low'
-        if self.trial_num > 2:
-            if self.tone_history[-3] == self.tone_history[-2] == self.tone_history[-1]:  # limit trial repeats to max 3
-                if self.tone_history[-1] == 'high':
-                    self.trial_id = 'low'
-                else:
-                    self.trial_id = 'high'
-        return self.trial_id
 
     def calculate_decision(self, timeout):  #  , wheel_position, turning_goal):
 
@@ -95,7 +80,7 @@ class AuditoryGoNoGo(BaseAuditoryTask):
             self.choice_hist.append(0)  # one for moved wheel
         time.sleep(0.001)  # 1 ms sleep, otherwise some threading issue occur
         return self.decision_var
-    #
+
     def check_trial_end(self):
         if time.time() > self.time_out:  # max length reach
             mess = "60 min passed -- time limit reached, enter 'stop' and take out animal"
@@ -113,7 +98,7 @@ class AuditoryGoNoGo(BaseAuditoryTask):
     def get_log_data(self):
         # always add one line to csv file upon event with timestamp for sync
         return "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}\n".format(time.time(), str(self.trial_num), str(self.trial_start),
-                                                           str(self.trial_id), str(self.tone_played),
+                                                           str(self.TRIAL_ID), str(self.tone_played),
                                                            str(self.decision_var), str(self.choice),
                                                            str(self.left_right), str(self.reward_time),
                                                            str(self.curr_iti))  # todo: 0: time_stamp, 1: trial_num, 2: trial_start, 3: trial_type:, 4: tone_played, 5: decision_variable, 6: choice_variable, 7: reward_time, 8: inter-trial-intervall
@@ -122,16 +107,14 @@ class AuditoryGoNoGo(BaseAuditoryTask):
         self.trial_start = 1
         self.logger.log_trial_data(self.get_log_data())
         self.trial_start = 0
-        self.trial_id = self.get_trial()
-        self.tone_history.append(self.trial_id)
+        self.tone_history.append(self.TRIAL_ID)
         self.cloud_bool = False
         while True:
             self.animal_quiet, self.cloud = self.check_quiet_window()  # call the QW checker function, stay in function as long animal holds wheel still, otherwise return and call function again
             if self.animal_quiet:  # if animal is quiet for quiet window length, ini new trial, otherwise stay in loop
                 self.animal_quiet = False
                 break
-        self.target_position = self.response_matrix[self.trial_id]
-        timeout = time.time() + self.response_window  # start a timer at the size of the response window
+        timeout = time.time() + self.response_window
         self.trial_num += 1
         self.decision_var = False  # set decision variable to False for start of trial, and then in the loop check for decision
         with sd.OutputStream(samplerate=self.stimulus_manager.fs, blocksize=len(self.cloud), channels=2, dtype='int16',
@@ -142,8 +125,9 @@ class AuditoryGoNoGo(BaseAuditoryTask):
             self.tone_played = 0
             self.wheel_start_position = self.encoder_data.getValue()
             while True:
-                self.decision_var = self.calculate_decision(timeout)  # should stay False until either response window is over or animal moved the wheel
-                if self.decision_var == self.target_position:  # if choice was correct
+                self.decision_var = self.calculate_decision(
+                    timeout)  # should stay False until either response window is over or animal moved the wheel
+                if self.decision_var == self.TARGET_POSITION:  # if choice was correct
                     self.cancel_audio = True
                     self.choice = "correct"
                     self.trial_stat[0] += 1
@@ -151,7 +135,7 @@ class AuditoryGoNoGo(BaseAuditoryTask):
                     if self.decision_var == "moved_wheel":  # reward only in go trials
                         self.reward_system.trigger_reward(self.logger, self.PUMP_TIME_ADJUST)
                     break
-                elif self.decision_var: # if choice was incorrect and variable is NOT False, trial was incorrect
+                elif self.decision_var == "no_response": # if choice was incorrect and variable is NOT False, trial was incorrect
                     self.cancel_audio = True
                     self.choice = "incorrect"
                     self.trial_stat[1] += 1
@@ -160,8 +144,6 @@ class AuditoryGoNoGo(BaseAuditoryTask):
         if self.choice == "correct":
             self.curr_iti = self.iti[0]
         else:
-            if self.target_position == "no_response":  # in nogo trials --> play punishment sound
-                self.play_tone(self.punish_sound, self.punish_duration, self.punish_amplitude)
             self.curr_iti = self.iti[1]  # if not correct, add 3 sec punishment timeout
 
         self.cancel_audio = False

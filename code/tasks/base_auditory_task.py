@@ -184,20 +184,19 @@ class BaseAuditoryTask(threading.Thread):
             self.curr_stim_strength = random.choice(options)
 
             # Set octave based on trial type
-            self.tgt_octave = 2 if self.trial_id == 'high' else 0
+            tgt_octave = 2 if self.trial_id == 'high' else 0
 
             # Create the tone cloud
-            self.cloud = self.stimulus_manager.create_tone_cloud(self.tgt_octave, self.curr_stim_strength)
+            self.cloud = self.stimulus_manager.create_tone_cloud(tgt_octave, self.curr_stim_strength)
 
             return self.cloud
         else:
-            # todo here for detection same?
             curr_stim_strength = self.stim_strength[0]
-            if self.trial_id == 'high':
-                self.tgt_octave = 2
+            if self.task_type == 'auditory_gonogo':
+                tgt_octave = 2 if self.trial_id == 'high' else 0
             else:
-                self.tgt_octave = 0
-            self.cloud = self.stimulus_manager.create_tone_cloud(self.tgt_octave, curr_stim_strength)
+                tgt_octave = 1
+            self.cloud = self.stimulus_manager.create_tone_cloud(tgt_octave, curr_stim_strength)
 
             return self.cloud
 
