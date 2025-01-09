@@ -356,7 +356,7 @@ class Auditory2AFC(BaseAuditoryTask):
 
         with sd.OutputStream(samplerate=self.stimulus_manager.fs, blocksize=len(self.cloud), channels=2, dtype='int16',
                              latency='low', callback=self.callback):
-            time.sleep(self.stimulus_manager.tone_cloud_duration * 2)  # to avoid zero shot trials, stream buffers 2x the cloud duration before tone onset
+            time.sleep(self.stimulus_manager.cloud_duration * 2)  # to avoid zero shot trials, stream buffers 2x the cloud duration before tone onset
             self.tone_played = 1
             print("tone played")
             self.logger.log_trial_data(self.get_log_data())
