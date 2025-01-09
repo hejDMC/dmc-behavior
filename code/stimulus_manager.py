@@ -97,10 +97,13 @@ class StimulusManager:
 
     def create_tone_cloud(self, tgt_octave, stim_strength):
         # Generate a tone cloud from target octave and stimulation strength
+        print("in func")
         tone_sequence_idx = [random.choice(range(np.shape(self.tones_arr[1])[0])) for _ in
                              range(self.num_tones)]
+        print("pre weighted octave")
         tone_sequence = np.array(
             [self.tones_arr[self.weighted_octave_choice(tgt_octave, stim_strength)][idx] for idx in tone_sequence_idx])
+        print("pre weighted octave")
         tone_sequence = [self.pitch_to_frequency(pitch) for pitch in tone_sequence]
         print(int(self.tone_cloud_duration))
         print(len(tone_sequence))
