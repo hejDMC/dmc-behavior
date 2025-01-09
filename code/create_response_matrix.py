@@ -60,7 +60,7 @@ else:
 
 # store this response matrix as .json file in the data-directory of the animal
 file_name = animal_id + "_response_matrix.json"
-file_path= os.path.join(animal_dir, file_name)
+file_path= os.path.join(data_io.path_manager.animal_dir, file_name)
 with open(file_path, "w") as outfile:
     json.dump(response_matrix, outfile, indent=4)
 
