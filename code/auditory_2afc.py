@@ -298,6 +298,7 @@ class Auditory2AFC(BaseAuditoryTask):
         self.tgt_octave = 2 if self.trial_id == 'high' else 0
 
         # Create the tone cloud
+        print("creating tone cloud")
         self.cloud = self.stimulus_manager.create_tone_cloud(self.tgt_octave, self.curr_stim_strength)
 
         return self.cloud
