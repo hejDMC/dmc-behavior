@@ -46,15 +46,15 @@ def start_option(device):
         d_b = input(question_str)
     return device_bool
 
-def plot_behavior_terminal(exp_dir, task_id):
+def plot_behavior_terminal(data_io, exp_dir):
     """
     Function to plot behavioral performance of animal after session in terminal
     :param exp_dir: Path
     :param trial_data_header: list
     """
     # load the trial data
-    trial_data_file = exp_dir.joinpath(f'{get_today()}_trial_data.csv')
-    trial_data_header = load_trial_header(task_id)
+    trial_data_file = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_trial_data.csv')
+    trial_data_header = data_io.load_trial_header()
     df=pd.read_csv(trial_data_file)
     trial_data = pd.read_csv(trial_data_file, names=trial_data_header)
     trial_times = trial_data[trial_data['trial_start'] == 1].reset_index()
@@ -87,9 +87,9 @@ def plot_behavior_terminal(exp_dir, task_id):
 
     # print the total consumed volume
     pump_data_header = ["time", "pump_duration"]
-    pump_data_file = exp_dir.joinpath(f'{get_today()}_pump_data.csv')
+    pump_data_file = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_pump_data.csv')
     pump_data = pd.read_csv(pump_data_file, names=pump_data_header)
-    pump_time = load_pump_calibration()
+    pump_time = data_io.load_pump_calibration()
     amount_reward = pump_data['pump_duration'].sum() / pump_time
     print('Amount consumed total volume: ' + str(amount_reward))
 
