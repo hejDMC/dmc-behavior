@@ -331,6 +331,7 @@ class Auditory2AFC(BaseAuditoryTask):
                                                                  str(self.block))  # todo: 0: time_stamp, 1: trial_num, 2: trial_start, 3: trial_type:, 4: tone_played, 5: decision_variable, 6: choice_variable, 7: reward_time, 8: inter-trial-intervall, 10: block
     def execute_task(self):
         # Example implementation for 2AFC task
+        print(f"trial start {self.trial_num}")
         self.trial_start = 1
         self.logger.log_trial_data(self.get_log_data())
         self.trial_start = 0
@@ -345,6 +346,7 @@ class Auditory2AFC(BaseAuditoryTask):
             if self.animal_quiet:  # if animal is quiet for quiet window length, ini new trial, otherwise stay in loop
                 trial_start = time.time()
                 self.animal_quiet = False
+                print("animal quite")
                 break
 
         self.target_position = self.response_matrix[self.trial_id]
@@ -355,6 +357,7 @@ class Auditory2AFC(BaseAuditoryTask):
                              latency='low', callback=self.callback):
             time.sleep(self.stimulus_manager.tone_cloud_duration * 2)  # to avoid zero shot trials, stream buffers 2x the cloud duration before tone onset
             self.tone_played = 1
+            print("tone played")
             self.logger.log_trial_data(self.get_log_data())
             self.tone_played = 0
             self.wheel_start_position = self.encoder_data.getValue()
