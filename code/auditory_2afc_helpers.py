@@ -349,7 +349,7 @@ class BiasCorrectionHandler:
     RIGHT_THRESHOLD = 0.15
     DEFAULT_BIAS = 0.5
     TASK_TYPE = '2afc'
-    def __init__(self, animal_dir: Path, first_day: bool, stage: int):
+    def __init__(self, data_io, first_day: bool, stage: int):
         """
         Initialize the BiasCorrectionHandler with the required parameters.
 
@@ -357,10 +357,9 @@ class BiasCorrectionHandler:
             animal_dir (Path): Path to the animal's data directory.
             first_day (bool): Flag indicating if it is the first day of training.
         """
-        self.animal_dir = animal_dir
+        self.animal_dir = data_io.animal_id
         self.first_day = first_day
         self.bias_correction = False
-        self.data_io = DataIO(self.animal_dir.parents[1], self.TASK_TYPE, self.animal_dir.stem)
         self.stage = stage
 
     def get_bias_correction(self) -> str:
