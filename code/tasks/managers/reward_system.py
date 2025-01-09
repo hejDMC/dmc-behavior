@@ -96,7 +96,6 @@ class RewardSystem:
         # todo check for adjusted pump times in 2AFC task
         GPIO.output(self.pump, GPIO.HIGH)
         curr_pump_duration = int(self.pump_duration * pump_time_adjust)
-        print(curr_pump_duration)
         logger.log_pump_data(curr_pump_duration)
         time.sleep(curr_pump_duration / 1000)
         GPIO.output(self.pump, GPIO.LOW)
