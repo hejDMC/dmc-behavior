@@ -12,12 +12,16 @@ from pathlib import Path
 import socket
 import time
 import json
-from utils import get_today, load_droid_setting
+from path_manager import PathManager
+from data_io import DataIO
+
+path_manager = PathManager((Path(__file__).parent / '..').resolve(), None)
+data_io = DataIO(path_manager, None)
 
 # get droid name
 droid = socket.gethostname()
 # get pump pin
-droid_settings = load_droid_setting()
+droid_settings = data_io.load_droid_setting()
 pump_pin = droid_settings['pin_map']['OUT']['pump']
 
 # enter pump duration and the number of repeats
@@ -42,7 +46,7 @@ pump_cali_dir = data_directory = (Path(__file__).parent / '../../data/pump_calib
 if not pump_cali_dir.exists():
     pump_cali_dir.mkdir(parents=True)
 pump_dict = {droid: pump_time}
-pump_fn = pump_cali_dir.joinpath(f'{get_today()}_pump_calibration.json')
+pump_fn = pump_cali_dir.joinpath(f'{path_manager.get_today()}_pump_calibration.json')
 with open(pump_fn, "w") as f:
     json.dump(pump_dict, f, indent=4)
 print(f'pump calibration data saved to {str(pump_fn)}')
