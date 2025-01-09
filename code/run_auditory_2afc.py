@@ -70,6 +70,6 @@ while True:
             sync_rec.join()
         if camera_bool:
             camera.join()
-        plot_behavior_terminal(exp_dir, task_type)  # plot behavior in terminal todo fix this function later
+        plot_behavior_terminal(data_io, exp_dir)  # plot behavior in terminal todo fix this function later
         print("ending_criteria: " + ending_criteria)
         sys.exit()
