@@ -8,12 +8,14 @@ class StimulusManager:
         self.task_prefs = task_prefs
         self.droid_settings = droid_settings
         self.fs = droid_settings['base_params']['tone_sampling_rate']
+        self.tone_fs = task_prefs['task_prefs']['tone_fs']
+        self.tone_duration = self.task_prefs['task_prefs']['tone_duration']
+        self.tone_amplitude = self.task_prefs['task_prefs']['tone_amplitude']
         self.scaler = preprocessing.MinMaxScaler(feature_range=(task_prefs['task_prefs']['cloud_range'][0],
                                                                 task_prefs['task_prefs']['cloud_range'][1]))
         self.tones_arr = self.generate_tones()
-        self.tone_cloud_duration = self.fs * self.task_prefs['task_prefs']['cloud_duration']
-        self.num_tones = int(self.tone_cloud_duration * 100 - (self.task_prefs['task_prefs']['tone_duration'] - 1 /
-                                                     self.task_prefs['task_prefs']['tone_fs']) * 100)
+        self.cloud_duration = self.task_prefs['task_prefs']['cloud_duration']
+        self.num_tones = int(self.cloud_duration * 100 - (self.tone_duration - 1 / self.tone_fs) * 100)
         print(f"num tones {self.num_tones}")
         # todo option for tones vs tone clouds
 
@@ -106,23 +108,16 @@ class StimulusManager:
             [self.tones_arr[self.weighted_octave_choice(tgt_octave, stim_strength)][idx] for idx in tone_sequence_idx])
         print("pre weighted octave")
         tone_sequence = [self.pitch_to_frequency(pitch) for pitch in tone_sequence]
-        print(int(self.tone_cloud_duration))
-        print(len(tone_sequence))
-        tone_cloud = np.zeros([int(self.tone_cloud_duration), len(tone_sequence)])
+        tone_cloud_duration = self.fs * self.cloud_duration
+        tone_cloud = np.zeros([int(tone_cloud_duration), len(tone_sequence)])
         k = 0
         # todo: save tone cloud data
         # pd.DataFrame(tone_sequence).T.to_csv(self.tone_cloud_fn, index=False, header=False, mode='a')
         for i, tone in enumerate(tone_sequence):
-            tone_cloud[k:k + int(self.fs * self.task_prefs['task_prefs']['tone_duration']), i] = self.create_tone(self.fs,
-                                                                                                             tone,
-                                                                                                             self.task_prefs[
-                                                                                                                 'task_prefs'][
-                                                                                                                 'tone_duration'],
-                                                                                                             self.task_prefs[
-                                                                                                                 'task_prefs'][
-                                                                                                                 'tone_amplitude'])
-            k += int(self.tone_cloud_duration / (((self.task_prefs['task_prefs']['tone_duration'] - 1 /
-                                              self.task_prefs['task_prefs']['tone_fs']) * 100) + len(tone_sequence)))
+            tone_cloud[k:k + int(self.fs * self.tone_duration), i] = self.create_tone(self.fs, tone, self.tone_duration,
+                                                                                      self.tone_amplitude)
+            k += int(tone_cloud_duration / (((self.tone_duration - 1 /
+                                              self.tone_fs) * 100) + len(tone_sequence)))
         tone_cloud = tone_cloud.sum(axis=1) // len(tone_sequence)
         tone_cloud = tone_cloud.reshape(-1, 1)
         return self.scaler.fit_transform(tone_cloud).astype(np.int16)
