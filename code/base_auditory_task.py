@@ -49,9 +49,8 @@ class BaseAuditoryTask(threading.Thread):
         self.response_window = self.task_prefs['task_prefs']['response_window']
 
         # set encoder parameters and initialize pins (GPIO numbers!)
-        self.encoder_left = self.droid_settings['pin_map']['IN']['encoder_left']  # pin of left encoder (green wire)
-        self.encoder_right = self.droid_settings['pin_map']['IN']['encoder_right']  # pin of right encoder (gray wire)
-        self.encoder_data = Encoder(self.encoder_left, self.encoder_right)
+        self.encoder_data = Encoder(self.droid_settings['pin_map']['IN']['encoder_left'],
+                                    self.droid_settings['pin_map']['IN']['encoder_right'])
         self.turning_goal = self.ENCODER_TO_DEGREE * self.task_prefs['encoder_specs']['target_degrees']  # threshold in degrees of wheel turn to count as 'choice' - converted into absolute values of 1024 encoder range
         if self.stage == 0:
             self.turning_goal = int(self.turning_goal / self.STAGE_0_TURNING_GOAL_ADJUST)

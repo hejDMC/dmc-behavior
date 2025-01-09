@@ -55,8 +55,6 @@ class Auditory2AFC(BaseAuditoryTask):
 
         self.response_matrix, self.pre_reversal = data_io.load_response_matrix()
         self.turning_goal = self.task_prefs['encoder_specs']['target_degrees']
-        self.encoder_data = Encoder(self.droid_settings['pin_map']['IN']['encoder_left'],
-                                    self.droid_settings['pin_map']['IN']['encoder_right'])
 
         self.bc_handler = BiasCorrectionHandler(self.animal_dir, self.first_day, self.stage)
         self.bias_correction = self.bc_handler.get_bias_correction()
