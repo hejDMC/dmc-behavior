@@ -18,7 +18,7 @@ animal_id = input("enter the animal ID:")
 
 task_list = ['2afc', 'gonogo', 'detection']
 task = input("enter the task:")
-path_manager = PathManager((Path(__file__).parent / '../../data').resolve(), animal_id)
+path_manager = PathManager((Path(__file__).parent / '..').resolve(), animal_id)
 data_io = DataIO(path_manager, task)
 while True:
     if task in task_list:
