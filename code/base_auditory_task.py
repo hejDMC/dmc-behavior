@@ -30,7 +30,7 @@ class BaseAuditoryTask(threading.Thread):
         # Components used by all tasks
         self.stimulus_manager = StimulusManager(self.task_prefs, self.droid_settings)
 
-        self.reward_system = RewardSystem(self.animal_dir, self.task_type, self.droid_settings, self.task_prefs, self.first_day,
+        self.reward_system = RewardSystem(self.data_io, self.task_type, self.droid_settings, self.task_prefs, self.first_day,
                                           self.stage)
         self.pump_duration = self.reward_system.pump_duration
 
