@@ -13,7 +13,7 @@ class BaseAuditoryTask(threading.Thread):
     def __init__(self, data_io, exp_dir, task_type):
         threading.Thread.__init__(self)
         self.data_io = data_io
-        self.animal_dir = self.data_io.path_manager.get_animal_dir()
+        self.animal_dir = self.data_io.path_manager.check_dir()
         self.task_type = task_type
 
         self.droid_settings = self.data_io.load_droid_setting()
