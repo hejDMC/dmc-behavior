@@ -92,6 +92,7 @@ class StageChecker:
             self.stage_advance = True
             self._print_stage_complete(self.stage)
         return self.stage_advance
+
     def _check_advance_stage_3(self):
         """Criteria to advance from stage 3 to stage 4: More than STAGE_3_CRITERIA trials completed."""
         if self.trial_num > self.STAGE_3_CRITERIA:
