@@ -102,6 +102,8 @@ class StimulusManager:
         tone_sequence = np.array(
             [self.tones_arr[self.weighted_octave_choice(tgt_octave, stim_strength)][idx] for idx in tone_sequence_idx])
         tone_sequence = [self.pitch_to_frequency(pitch) for pitch in tone_sequence]
+        print(int(self.tone_cloud_duration))
+        print(len(tone_sequence))
         tone_cloud = np.zeros([int(self.tone_cloud_duration), len(tone_sequence)])
         k = 0
         # todo: save tone cloud data
