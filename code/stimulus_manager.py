@@ -17,7 +17,7 @@ class StimulusManager:
         self.tones_arr = self.generate_tones()
         self.cloud_duration = self.task_prefs['task_prefs']['cloud_duration']
         self.num_tones = int(self.cloud_duration * 100 - (self.tone_duration - 1 / self.tone_fs) * 100)
-        self.tone_cloud_fn = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_tone_cloud.csv')
+        self.tone_cloud_fn = exp_dir.joinpath(f'{data_io.path_manager.get_today()}_tone_cloud_data.csv')
         # todo option for tones vs tone clouds
 
     def pitch_to_frequency(self, pitch):
