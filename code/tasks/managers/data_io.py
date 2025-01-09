@@ -109,7 +109,7 @@ class DataIO:
         return meta_data
 
 
-    def store_pref_data(self, exp_dir: Path, procedure: str = "NaN") -> None:
+    def store_pref_data(self, exp_dir: Path) -> None:
         """Store preference data for the session."""
         droid_prefs = self.load_droid_setting()
         task_prefs = self.load_task_prefs()

@@ -28,7 +28,7 @@ animal_id = input("enter the mouse ID:")
 input_task = input("enter the task:")
 while True:
     if input_task in task_list:
-        task_type = f'auditory_{task}'
+        task_type = f'auditory_{input_task}'
         task_class_name = task_dict[task_type]
         break
     else:
@@ -56,7 +56,6 @@ camera_bool = False
 while True:
     command = input("Enter 'start' to begin:")
     if command == "start":
-
         if not exp_dir:
             animal_dir = path_manager.check_dir()
             exp_dir = path_manager.make_exp_dir()
@@ -88,7 +87,7 @@ while True:
                         ending_criteria=ending_criteria, procedure=task_type, pre_reversal=task.pre_reversal,
                         experimenter=experimenter)
         # store_reaction_times(exp_dir, task)
-        data_io.store_pref_data(exp_dir, procedure=task_type)
+        data_io.store_pref_data(exp_dir)
         task.join()
         rotary.join()
         if sync_bool:
