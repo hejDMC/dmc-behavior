@@ -35,10 +35,12 @@ class TriggerPulse(BaseRecorder):
         super().__init__(path_manager, exp_dir, task_type, file_name_suffix='camera_pulse_data', rate_key='camera_trigger_rate')
         self.trigger_pin = self.droid_settings['pin_map']['OUT']['trigger_camera']
         self.trigger_state = 0
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.trigger_pin, GPIO.OUT)
 
     def pull_trigger(self):
         self.trigger_state = 1
-        GPIO.setup(self.trigger_pin, GPIO.OUT)
         GPIO.output(self.trigger_pin, self.trigger_state)
         self.write_data(self.trigger_state)
         self.trigger_state = 0

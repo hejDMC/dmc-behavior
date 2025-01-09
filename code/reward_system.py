@@ -17,6 +17,8 @@ class RewardSystem:
         # self.pump_duration = self.pump_min_max[0]
         self.pump_duration = self.get_pump_duration()
         self.pump = self.droid_settings['pin_map']['OUT']['pump']
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pump, GPIO.OUT)
 
     def get_pump_duration(self) -> int:

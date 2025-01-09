@@ -65,8 +65,8 @@ class BaseAuditoryTask(threading.Thread):
         self.logger = Logger(self.animal_dir, self.exp_dir)
 
         # Set GPIO mode
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
+        # GPIO.setwarnings(False)
+        # GPIO.setmode(GPIO.BCM)
 
         # data logging
         self.trial_data_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_trial_data.csv')
