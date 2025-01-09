@@ -20,7 +20,7 @@ experimenter = input("who is running the experiment?")
 hour_format = "%H:%M:%S"
 start_time = datetime.now().strftime(hour_format)
 
-path_manager = PathManager((Path(__file__).parent / '../../data').resolve(), animal_id)
+path_manager = PathManager((Path(__file__).parent / '..').resolve(), animal_id)
 data_io = DataIO(path_manager, task_type)
 
 

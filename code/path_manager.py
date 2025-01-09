@@ -2,14 +2,14 @@ from pathlib import Path
 from datetime import date, datetime
 
 class PathManager:
-    def __init__(self, data_dir: Path, animal_id: str):
+    def __init__(self, base_dir: Path, animal_id: str):
         """
         Initialize with a base directory and task type.
         Parameters:
             base_dir (Path): The base directory where data for animals/tasks is stored.
             task_type (str): The type of task for this handler.
         """
-        self.data_dir = data_dir
+        self.base_dir = base_dir
         self.animal_id = animal_id
 
     def check_dir(self):
@@ -18,8 +18,8 @@ class PathManager:
         :return: animal_dir: Path
         """
 
-        # data_directory = self.base_dir.joinpath('data')
-        animal_dir = self.data_dir.joinpath(self.animal_id)
+        data_directory = self.base_dir.joinpath('data')
+        animal_dir = data_directory.joinpath(self.animal_id)
         if animal_dir.exists():
             pass
         else:
