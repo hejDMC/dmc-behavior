@@ -80,32 +80,25 @@ class Auditory2AFC(BaseAuditoryTask):
         Returns:
             str: The trial ID ('high' or 'low').
         """
-        # Constants for easier adjustment
 
         if self.stage < 5:
-            # Stage < 5: Random choice, no bias
             self.trial_id = 'high' if random.random() < self.NO_BIAS_PROB else 'low'
 
         elif self.stage == 5:
-            # Stage 5 logic
             if self.trial_num <= self.NO_BIAS_TRIALS_STAGE_5:
-                # First 90 trials, no bias
                 if self.trial_num == self.NO_BIAS_TRIALS_STAGE_5:
                     self.get_block()  # Set up the block after first 90 trials
                 self.trial_id = 'high' if random.random() < self.NO_BIAS_PROB else 'low'
             else:
-                # After 90 trials, follow block bias
                 high_prob = self.HIGH_PROB_STAGE_5_BLOCK_NEG if self.block == -1 else self.HIGH_PROB_STAGE_5_BLOCK_POS
                 self.trial_id = 'high' if random.random() < high_prob else 'low'
 
-                # Increment block counter and switch block if needed
                 self.block_counter += 1
                 print(f"Block counter: {self.block_counter}")
                 if self.block_counter >= self.block_length:
-                    self.get_block()  # Change block when block length is reached
+                    self.get_block()  # change block when block length is reached
 
         else:
-            # Undefined stage handling
             raise ValueError(f"Unexpected stage value: {self.stage}. Only stages 0-5 are implemented.")
 
         return self.trial_id
@@ -117,32 +110,24 @@ class Auditory2AFC(BaseAuditoryTask):
             str: The trial ID ('high' or 'low').
         """
 
-        # Stage 0: Handle initial learning stage
         if self.stage == 0:
             if len(self.correct_hist) < self.MIN_CORRECT_HISTORY:
-                # Repeat the last trial if fewer than 3 trials have occurred
                 self.trial_id = self.last_trial
             else:
-                # Check the last three trials
                 corr_sum = np.sum(self.correct_hist[-self.MIN_CORRECT_HISTORY:])
                 if corr_sum == self.MIN_CORRECT_HISTORY:  # If the last three trials were all correct, switch trial
                     self.correct_hist = []  # Reset history
                     self.trial_id = 'low' if self.last_trial == 'high' else 'high'
                 else:
-                    # Otherwise, repeat the last trial
                     self.trial_id = self.last_trial
 
-        # Stages 1-3: Apply debiasing if necessary, otherwise get trial
         elif 0 < self.stage < self.DEBIASING_STAGE_THRESHOLD:
             if self.choice == "incorrect" and self.trial_num > self.MIN_TRIAL_DEBIAS:
-                # Apply debiasing if previous trial was incorrect
                 self.trial_id = self.debias()
                 print("call debias")
             else:
-                # Otherwise, randomly initialize trial ID
                 self.trial_id = self.get_trial()
 
-        # Stage 4 and beyond: No debiasing, use get_trial
         else:
             self.trial_id = self.get_trial()
 
@@ -212,7 +197,6 @@ class Auditory2AFC(BaseAuditoryTask):
                 self.stop = True
 
     def check_stage(self):
-        # Logic for checking stage progression
         self.stage_checker = StageChecker(self.data_io, self.stage, self.trial_stat, self.trial_num, self.decision_history,
                                           self.correct_hist, self.animal_dir)
         self.stage_advance = self.stage_checker.check_stage()
@@ -248,7 +232,6 @@ class Auditory2AFC(BaseAuditoryTask):
                                                                  str(self.reward_time), str(self.curr_iti),
                                                                  str(self.block))  # todo: 0: time_stamp, 1: trial_num, 2: trial_start, 3: trial_type:, 4: tone_played, 5: decision_variable, 6: choice_variable, 7: reward_time, 8: inter-trial-intervall, 10: block
     def execute_task(self):
-        # Example implementation for 2AFC task
         self.trial_start = 1
         self.logger.log_trial_data(self.get_log_data())
         self.trial_start = 0

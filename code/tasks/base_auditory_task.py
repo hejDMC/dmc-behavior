@@ -71,10 +71,6 @@ class BaseAuditoryTask(threading.Thread):
 
         self.logger = Logger(self.data_io, self.exp_dir)
 
-        # Set GPIO mode
-        # GPIO.setwarnings(False)
-        # GPIO.setmode(GPIO.BCM)
-
         # data logging
         self.trial_data_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_trial_data.csv')
         self.tone_cloud_fn = exp_dir.joinpath(f'{self.data_io.path_manager.get_today()}_tone_cloud_data.csv')
@@ -98,27 +94,23 @@ class BaseAuditoryTask(threading.Thread):
         Returns:
             bool: True if today is considered the first day of training, otherwise False.
         """
-        # Set threshold for what constitutes enough data to determine the training phase.
-        MIN_ENTRIES_FOR_TRAINING = 3  # Example of giving '2' a meaningful name
 
-        # Count the number of items in the animal directory
+        MIN_ENTRIES_FOR_TRAINING = 3
+
         num_entries = sum(1 for _ in self.animal_dir.iterdir())
 
-        # If there are fewer than the required number of entries, default to first day
         if num_entries < MIN_ENTRIES_FOR_TRAINING:
             print("No habituation data or insufficient data found.")
             print("Defaulting to first_day=True")
             return True
 
-        # Try to load metadata and determine the procedure type
         try:
             meta_data = self.data_io.load_meta_data()
             if meta_data.get('procedure', '').startswith('habituation'):
-                return True  # First day of training if the last day was still habituation
+                return True
             else:
                 return False
         except (FileNotFoundError, KeyError, ValueError) as e:
-            # Handle potential errors (e.g., file not found, JSON decoding error, missing keys)
             print(f"Error loading metadata: {e}")
             print("Defaulting to first_day=True due to missing or corrupt metadata")
             return True
@@ -130,25 +122,21 @@ class BaseAuditoryTask(threading.Thread):
         Returns:
             int: The current stage of training.
         """
-        # Default to stage 0 if it's the first day
         if self.first_day:
             print("Stage: 0")
             return 0
 
-        # Load metadata to determine the current stage
         try:
             meta_data = self.data_io.load_meta_data()
             curr_stage = meta_data.get('curr_stage', 0)  # Default to 0 if 'curr_stage' is missing
             stage_advance = meta_data.get('stage_advance', False)  # Default to False if 'stage_advance' is missing
 
-            # Determine the current stage based on metadata
             if not stage_advance:
                 stage = curr_stage
             else:
                 stage = curr_stage + 1
 
         except (FileNotFoundError, KeyError, ValueError) as e:
-            # Handle any errors in loading metadata
             print(f"Error loading metadata: {e}")
             print("Defaulting to stage 0")
             stage = 0
@@ -164,7 +152,6 @@ class BaseAuditoryTask(threading.Thread):
             The generated tone cloud.
         """
         if self.task_type == 'auditory_2afc':
-            # Define the selection logic for stimulus strengths based on stage
             stage_selector = {
                 0: [self.stim_strength[0]],  # Stage 0, always 100
                 1: [self.stim_strength[0]],  # Stage 1, always 100
@@ -180,13 +167,10 @@ class BaseAuditoryTask(threading.Thread):
                 print(f'Warning: Stage {self.stage} out of range (0-5), defaulting to stage 0')
                 options = stage_selector[0]  # default to stage 0
 
-            # Select the current stimulus strength randomly from options
             self.curr_stim_strength = random.choice(options)
 
-            # Set octave based on trial type
             tgt_octave = 2 if self.trial_id == 'high' else 0
 
-            # Create the tone cloud
             self.cloud = self.stimulus_manager.create_tone_cloud(tgt_octave, self.curr_stim_strength)
 
             return self.cloud

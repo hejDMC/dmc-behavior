@@ -267,7 +267,6 @@ class StageChecker:
         idx = [i - 1 for i in idx]  # substract one to get to matching idx
         dummy_df = trial_data.iloc[idx][trial_data_header[3:]].reset_index(drop=True).copy()
         trial_times = pd.concat([trial_times, dummy_df], axis=1)
-        # todo this used in gonogo task as well?
         if self.TASK_TYPE == '2afc':
             right_trials = self._get_right_trials()
             trial_times['stim_strength'] = [int(stim) for stim in

@@ -87,7 +87,6 @@ class StimulusManager:
         return audio
 
     def generate_tones(self):
-        # Create the tone clouds for different octaves
         low_octave = np.linspace(self.task_prefs['task_prefs']['low_octave'][0],
                                  self.task_prefs['task_prefs']['low_octave'][1],
                                  self.task_prefs['task_prefs']['low_octave'][2])

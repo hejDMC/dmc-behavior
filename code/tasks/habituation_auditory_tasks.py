@@ -17,7 +17,6 @@ from base_auditory_task import BaseAuditoryTask
 
 #%%
 class Habituation(BaseAuditoryTask):
-    # todo constants
 
     SECONDS = 60
     MICROLITERS = 1000
