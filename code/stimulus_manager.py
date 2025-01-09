@@ -14,6 +14,7 @@ class StimulusManager:
         self.tone_cloud_duration = self.fs * self.task_prefs['task_prefs']['cloud_duration']
         self.num_tones = int(self.tone_cloud_duration * 100 - (self.task_prefs['task_prefs']['tone_duration'] - 1 /
                                                      self.task_prefs['task_prefs']['tone_fs']) * 100)
+        print(f"num tones {self.num_tones}")
         # todo option for tones vs tone clouds
 
     def pitch_to_frequency(self, pitch):
