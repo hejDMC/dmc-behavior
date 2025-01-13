@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from managers.utils.psychofit import (
+from tasks.managers.utils.psychofit import (
     erf_psycho,
     erf_psycho_2gammas,
     mle_fit_psycho,

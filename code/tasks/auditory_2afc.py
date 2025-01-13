@@ -24,8 +24,8 @@ import time
 
 import numpy as np
 import sounddevice as sd
-from auditory_2afc_helpers import BiasCorrectionHandler, StageChecker
-from base_auditory_task import BaseAuditoryTask
+from tasks.auditory_2afc_helpers import BiasCorrectionHandler, StageChecker
+from tasks.base_auditory_task import BaseAuditoryTask
 
 
 # %%
