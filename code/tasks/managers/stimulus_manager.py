@@ -141,8 +141,8 @@ class StimulusManager:
             self.tone_cloud_fn, index=False, header=False, mode="a"
         )
         for i, tone in enumerate(tone_sequence):
-            tone_cloud[k : k + int(self.fs * self.tone_duration), i] = self.create_tone(
-                self.fs, tone, self.tone_duration, self.tone_amplitude
+            tone_cloud[k : k + int(self.fs * self.tone_duration), i] = self.create_tone(tone, self.tone_duration,
+                                                                                        self.tone_amplitude
             )
             k += int(
                 tone_cloud_duration
