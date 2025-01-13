@@ -5,7 +5,7 @@
             "encoder_left": 27,
             "encoder_right": 22,
             "licking_spout": "tba",
-            "microscope_sync": 11,
+            "microscope_sync": 23,
             "encoder_left_rec": 10,
             "encoder_right_rec": 9
         },
@@ -13,7 +13,7 @@
             "pump": 16,
             "trigger_camera": 6,
             "opto": 26,
-            "led": 23
+            "led": 'tba'
         }
     },
     "base_params": {
