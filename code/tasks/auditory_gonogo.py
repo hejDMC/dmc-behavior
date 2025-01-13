@@ -56,7 +56,7 @@ class AuditoryGoNoGo(BaseAuditoryTask):
         )  # list for keeping track of tone history, make sure to have same tone max 3x
         self.choice_hist = []
 
-    def stage_checker(self):
+    def check_stage(self):
         # function to check if one advances in stages, to be called at the end of a session
         if self.stage == 0:
             # criteria to advance from stage 0 to stage 1 --> more than 150 correct trials on two consecutive days
