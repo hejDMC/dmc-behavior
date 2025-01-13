@@ -23,7 +23,7 @@ import random
 import time
 
 import sounddevice as sd
-from base_auditory_task import BaseAuditoryTask
+from tasks.base_auditory_task import BaseAuditoryTask
 
 # %%
 
