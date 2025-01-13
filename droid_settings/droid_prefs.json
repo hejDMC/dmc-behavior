@@ -13,7 +13,7 @@
             "pump": 16,
             "trigger_camera": 6,
             "opto": 26,
-            "led": 'tba'
+            "led": "tba"
         }
     },
     "base_params": {
