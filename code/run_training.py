@@ -6,14 +6,14 @@ from pathlib import Path
 from tasks.managers.data_io import DataIO
 from tasks.managers.path_manager import PathManager
 from tasks.managers.reader_writers import RotaryRecorder, SyncRecorder, TriggerPulse
-from tasks.managers.utils.utils import plot_behavior_terminal
+from tasks.managers.utils.utils import plot_behavior_terminal, start_option
 
 task, sync_rec, camera, rotary, exp_dir = None, None, None, None, None
 droid = socket.gethostname()
 # comment these lines if you don't want to get questions asked
 # if droid == "bb8":
-#     sync_bool = start_option('sync_pulse')
-#     camera_bool = start_option('camera_trigger') # for bb8 comment this line too (for now) todo: check if you want ot change this
+sync_bool = start_option('sync_pulse')
+camera_bool = start_option('camera_trigger') # for bb8 comment this line too (for now) todo: check if you want ot change this
 
 
 task_list = ["2afc", "gonogo", "detection"]
