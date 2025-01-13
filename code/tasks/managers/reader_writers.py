@@ -2,7 +2,7 @@ import threading
 import time
 
 import RPi.GPIO as GPIO
-#from data_io import DataIO
+from tasks.managers.data_io import DataIO
 from utils.encoder import Encoder
 from utils.sync_pulse import Sync_Pulse
 
