@@ -3,8 +3,8 @@ import time
 
 import RPi.GPIO as GPIO
 from tasks.managers.data_io import DataIO
-from utils.encoder import Encoder
-from utils.sync_pulse import Sync_Pulse
+from tasks.utils.encoder import Encoder
+from tasks.utils.sync_pulse import Sync_Pulse
 
 
 class BaseRecorder(threading.Thread):
