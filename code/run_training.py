@@ -27,7 +27,6 @@ task_dict = {
 animal_id = input("enter the mouse ID:")
 
 input_task = input("enter the task:")
-print(input_task)
 while True:
     if input_task in task_list:
         task_type = f"auditory_{input_task}"
