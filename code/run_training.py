@@ -12,6 +12,9 @@ task, sync_rec, camera, rotary, exp_dir = None, None, None, None, None
 droid = socket.gethostname()
 # comment these lines if you don't want to get questions asked
 # if droid == "bb8":
+# booleans to set if you want to trigger camera/record sync pulses from 2p
+# sync_bool = False
+# camera_bool = False
 sync_bool = start_option('sync_pulse')
 camera_bool = start_option('camera_trigger') # for bb8 comment this line too (for now) todo: check if you want ot change this
 
@@ -50,9 +53,7 @@ path_manager = PathManager((Path(__file__).parent / "..").resolve(), animal_id)
 data_io = DataIO(path_manager, task_type)
 
 
-# booleans to set if you want to trigger camera/record sync pulses from 2p
-sync_bool = False
-camera_bool = False
+
 
 while True:
     command = input("Enter 'start' to begin:")
