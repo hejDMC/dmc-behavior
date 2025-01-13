@@ -5,10 +5,10 @@ import time
 import numpy as np
 import pandas as pd
 import sounddevice as sd
-from managers.logger import Logger
-from managers.reward_system import RewardSystem
-from managers.stimulus_manager import StimulusManager
-from managers.utils.encoder import Encoder
+from tasks.managers.logger import Logger
+from tasks.managers.reward_system import RewardSystem
+from tasks.managers.stimulus_manager import StimulusManager
+from tasks.managers.utils.encoder import Encoder
 
 
 # Base class for common elements in auditory tasks
