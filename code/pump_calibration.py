@@ -17,8 +17,8 @@ import RPi.GPIO as GPIO
 from tasks.managers.data_io import DataIO
 from tasks.managers.path_manager import PathManager
 
-path_manager = PathManager((Path(__file__).parent / "..").resolve(), None)
-data_io = DataIO(path_manager, None)
+path_manager = PathManager((Path(__file__).parent / "..").resolve(), 'pump_calibration')
+data_io = DataIO(path_manager, 'pump_calibration')
 
 # get droid name
 droid = socket.gethostname()
@@ -48,11 +48,7 @@ pump_time = int(
         "enter the duration of pump opening resulting in delivery of 1 ul reward (in ms):"
     )
 )
-pump_cali_dir = data_directory = (
-    Path(__file__).parent / "../../data/pump_calibration"
-).resolve()
-if not pump_cali_dir.exists():
-    pump_cali_dir.mkdir(parents=True)
+pump_cali_dir = path_manager.check_dir()
 pump_dict = {droid: pump_time}
 pump_fn = pump_cali_dir.joinpath(f"{path_manager.get_today()}_pump_calibration.json")
 with open(pump_fn, "w") as f:
