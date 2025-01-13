@@ -15,7 +15,6 @@ class BaseRecorder(threading.Thread):
         self.rate = self.droid_settings["base_params"][rate_key]
 
         self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_{file_name_suffix}.csv")
-        print(self.fn)
         self.stop = False
 
     def write_data(self, data):
