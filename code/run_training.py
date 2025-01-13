@@ -36,7 +36,7 @@ while True:
     else:
         print("please enter one of the following names:")
         print(*task_list, sep=", ")
-    task = input("enter the task:")
+    input_task = input("enter the task:")
 
 module = __import__(f"tasks.{task_type}", fromlist=[task_class_name])
 TaskClass = getattr(module, task_class_name)
