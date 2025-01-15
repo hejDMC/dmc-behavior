@@ -114,6 +114,12 @@ cd dmc-behavior
 ```
 python3.7 -m venv ./venv
 ```
+\* if the user has a different version of Python installed on their system, it's recommended to install and configure a local [pyenv](https://github.com/pyenv/pyenv) profile inside of *DMC-Behavior* folder with Python version 3.7 (for example '3.7.17') before creating the virtual environment:
+```bash
+pyenv install 3.7.17
+pyenv local 3.7.17
+```
+
 - activate the environment and install the required packages
 ```
 source ./venv/bin/activate
