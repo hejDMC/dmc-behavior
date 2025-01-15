@@ -1,5 +1,6 @@
 import threading
 import time
+import csv
 
 import RPi.GPIO as GPIO
 from tasks.managers.data_io import DataIO
@@ -95,21 +96,35 @@ class RotaryRecorder(BaseRecorder):
 #         self.write_data(sync_value)
 #         time.sleep(1 / self.rate)
 
-class SyncRecorder(BaseRecorder):
+class SyncRecorder(threading.Thread):
     def __init__(self, path_manager, exp_dir, task_type):
-        super().__init__(
-            path_manager,
-            exp_dir,
-            task_type,
-            file_name_suffix="sync_pulse_data",
-            rate_key="2p_sync_rate",
-        )
-        self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
-        self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self.record)
+        super().__init__()
+        data_io = DataIO(path_manager, task_type)
+        self.droid_settings = data_io.load_droid_setting()
+        self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_sync_pulse_data.csv")
+        self.running = False
+        self.file = open(self.fn, mode='w', newline='')
+        self.writer = csv.writer(self.file)
+        self.writer.writerow(["Timestamp", "PinState"])  # CSV header
 
-    def record(self):
-        """Record data when a rising edge is detected."""
-        self.write_data('1')  # Log '1' to indicate a rising edge
+        self.stop = False
+
+        self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
+        GPIO.setup(self.sync_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        # self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self._transition_occurred)
+
+    def run(self):
+        GPIO.add_event_detect(self.sync_pin, GPIO.RISING, callback=self._transition_occurred)
+        while not self.stop:
+            pass
+        GPIO.remove_event_detect(self.sync_pin)  # Remove event detection
+        self.file.close()
+
+    def _transition_occurred(self):
+            if not self.stop:
+                self.writer.writerow([time.time(), 1])
+                self.file.flush()  # Ensure data is written immediately
+
 
 # class SyncRecorder(threading.Thread):
 #     def __init__(self, path_manager, exp_dir, task_type):
