@@ -107,21 +107,18 @@ class SyncRecorder(threading.Thread):
 
         self.sync_pin = self.sync_pin  # GPIO pin on raspi
 
-        GPIO.setup(self.sync_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # initialize pin as input pin
-        GPIO.add_event_detect(self.sync_pin, GPIO.RISING, callback=self.write_sync_data)
-
 
         # Initialize Sync_Pulse with a callback to write data on rising edge
-        # self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self.write_sync_data)
+        self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self.write_sync_data)
 
     def write_sync_data(self):
         """Writes data to the file only on rising edge."""
         with open(self.fn, "a") as log:
             log.write(f"{time.time()},1\n")
 
-    # def run(self):
-    #     while not self.stop:
-    #         self.sync_pulse.transition_occurred()
+    def run(self):
+        while not self.stop:
+            self.sync_pulse.transition_occurred()
 
 #     def stop_recording(self):
 #         self.stop = True
