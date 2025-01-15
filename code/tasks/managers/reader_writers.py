@@ -95,30 +95,45 @@ class RotaryRecorder(BaseRecorder):
 #         self.write_data(sync_value)
 #         time.sleep(1 / self.rate)
 
-
-class SyncRecorder(threading.Thread):
+class SyncRecorder(BaseRecorder):
     def __init__(self, path_manager, exp_dir, task_type):
-        super().__init__()
-        data_io = DataIO(path_manager, task_type)
-        self.droid_settings = data_io.load_droid_setting()
-        self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_sync_pulse_data.csv")
+        super().__init__(
+            path_manager,
+            exp_dir,
+            task_type,
+            file_name_suffix="sync_pulse_data",
+            rate_key="2p_sync_rate",
+        )
         self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
-        self.stop = False
+        self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self.record)
 
-        self.sync_pin = self.sync_pin  # GPIO pin on raspi
+    def record(self):
+        """Record data when a rising edge is detected."""
+        self.write_data('1')  # Log '1' to indicate a rising edge
 
-
-        # Initialize Sync_Pulse with a callback to write data on rising edge
-        self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self.write_sync_data)
-
-    def write_sync_data(self):
-        """Writes data to the file only on rising edge."""
-        with open(self.fn, "a") as log:
-            log.write(f"{time.time()},1\n")
-
-    def run(self):
-        while not self.stop:
-            self.sync_pulse.transition_occurred()
+# class SyncRecorder(threading.Thread):
+#     def __init__(self, path_manager, exp_dir, task_type):
+#         super().__init__()
+#         data_io = DataIO(path_manager, task_type)
+#         self.droid_settings = data_io.load_droid_setting()
+#         self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_sync_pulse_data.csv")
+#         self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
+#         self.stop = False
+#
+#         self.sync_pin = self.sync_pin  # GPIO pin on raspi
+#
+#
+#         # Initialize Sync_Pulse with a callback to write data on rising edge
+#         self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self.write_sync_data)
+#
+#     def write_sync_data(self):
+#         """Writes data to the file only on rising edge."""
+#         with open(self.fn, "a") as log:
+#             log.write(f"{time.time()},1\n")
+#
+#     def run(self):
+#         while not self.stop:
+#             self.sync_pulse.transition_occurred()
 
 #     def stop_recording(self):
 #         self.stop = True

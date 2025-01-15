@@ -12,19 +12,12 @@ class Sync_Pulse:
         self.value = 0  # start with 0 as beginning of trial pin should be low
         self.callback = callback  # optional callback to trigger on rising edge
         GPIO.setup(self.sync_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # initialize pin as input pin
-        GPIO.add_event_detect(self.sync_pin, GPIO.RISING, callback=self.transition_occurred)  # monitor transitions
+        GPIO.add_event_detect(self.sync_pin, GPIO.RISING, callback=self.transition_occurred)  # detect only rising edge
 
     def transition_occurred(self):
-        # Detect rising edge (0 to 1 transition)
-        if self.value == 0 and GPIO.input(self.sync_pin) == 1:
-            self.value = 1
-            if self.callback is not None:
-                self.callback()  # Trigger the callback on rising edge
-        elif self.value == 1 and GPIO.input(self.sync_pin) == 0:
-            self.value = 0
-
-    def get_value(self):
-        return self.value
+        # Trigger callback on rising edge
+        if self.callback is not None:
+            self.callback()
 
 # class Sync_Pulse:
 #
