@@ -14,7 +14,7 @@ class Sync_Pulse:
         GPIO.setup(self.sync_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # initialize pin as input pin
         GPIO.add_event_detect(self.sync_pin, GPIO.RISING, callback=self.transition_occurred)  # monitor transitions
 
-    def transition_occurred(self, channel):
+    def transition_occurred(self):
         # Detect rising edge (0 to 1 transition)
         if self.value == 0 and GPIO.input(self.sync_pin) == 1:
             self.value = 1
