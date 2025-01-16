@@ -120,7 +120,7 @@ class SyncRecorder(threading.Thread):
         GPIO.remove_event_detect(self.sync_pin)  # Remove event detection
         self.file.close()
 
-    def _transition_occurred(self):
+    def _transition_occurred(self, pin):
         if not self.stop:
             print('transition occurred')
             self.writer.writerow([time.time(), 1])
