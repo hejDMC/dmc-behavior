@@ -121,9 +121,10 @@ class SyncRecorder(threading.Thread):
         self.file.close()
 
     def _transition_occurred(self):
-            if not self.stop:
-                self.writer.writerow([time.time(), 1])
-                self.file.flush()  # Ensure data is written immediately
+        if not self.stop:
+            print('transition occurred')
+            self.writer.writerow([time.time(), 1])
+            self.file.flush()  # Ensure data is written immediately
 
 
 # class SyncRecorder(threading.Thread):
