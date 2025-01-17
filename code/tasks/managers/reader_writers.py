@@ -30,8 +30,11 @@ class BaseRecorder(threading.Thread):
         self.file.flush()  # Ensure data is written immediately
 
     def run(self):
+        next_time = time.time()
         while not self.stop:
+            next_time += 1 / self.rate
             self.record()
+            time.sleep(max(0, next_time - time.time()))
         self.file.close()
 
     def record(self):
@@ -134,7 +137,6 @@ class SyncRecorder(BaseRecorder):
         sync_value = str(self.sync_pulse.get_value())
         if sync_value != self.old_value:
             self.write_data(sync_value)
-        time.sleep(0)
         self.old_value = sync_value
 
 
