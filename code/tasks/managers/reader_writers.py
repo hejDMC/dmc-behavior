@@ -97,11 +97,15 @@ class SyncRecorder(BaseRecorder):
         )
         self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
         self.sync_pulse = Sync_Pulse(self.sync_pin)
+        self.old_value = 0
 
     def record(self):
         sync_value = str(self.sync_pulse.get_value())
-        self.write_data(sync_value)
+        if sync_value != self.old_value:
+            self.write_data(sync_value)
         time.sleep(1 / self.rate)
+        self.old_value = sync_value
+
 
 # class SyncRecorder(threading.Thread):
 #     def __init__(self, path_manager, exp_dir, task_type):
