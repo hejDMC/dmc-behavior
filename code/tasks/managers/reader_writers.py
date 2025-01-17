@@ -30,11 +30,8 @@ class BaseRecorder(threading.Thread):
         self.file.flush()  # Ensure data is written immediately
 
     def run(self):
-        next_time = time.time()
         while not self.stop:
-            next_time += 1 / self.rate
             self.record()
-            time.sleep(max(0, next_time - time.time()))
         self.file.close()
 
     def record(self):
@@ -131,14 +128,17 @@ class SyncRecorder(BaseRecorder):
         )
         self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
         self.sync_pulse = Sync_Pulse(self.sync_pin)
+        self.sync_pulse_list = []
         self.old_value = 0
 
     def record(self):
         sync_value = str(self.sync_pulse.get_value())
         if sync_value != self.old_value:
-            self.write_data(sync_value)
+            self.sync_pulse_list.append([time.time(), 1])
+            # self.write_data(sync_value)
         self.old_value = sync_value
-
+        if self.stop:
+            self.writer.writerows(self.sync_pulse_list)
 
 # class SyncRecorder(threading.Thread):
 #     def __init__(self, path_manager, exp_dir, task_type):
