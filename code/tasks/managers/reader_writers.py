@@ -56,8 +56,8 @@ class TriggerPulse(BaseRecorder):
 
     def pull_trigger(self):
         self.trigger_state = 1
+        self.write_data(self.trigger_state)  # todo move one line down
         GPIO.output(self.trigger_pin, self.trigger_state)
-        self.write_data(self.trigger_state)
         self.trigger_state = 0
         GPIO.output(self.trigger_pin, self.trigger_state)
         self.write_data(self.trigger_state)
@@ -97,14 +97,44 @@ class SyncRecorder(BaseRecorder):
         )
         self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
         self.sync_pulse = Sync_Pulse(self.sync_pin)
-        self.old_value = 0
+        self.timer = time.time() + 60
+        self.file_counter = 0
+
 
     def record(self):
+        if time.time() > self.timer:
+            self.file.close()
+            self.file_counter += 1
+            self.fn = self.fn.parent.joinpath(f"{self.fn.stem}_{self.file_counter}.csv")
+            self.file = open(self.fn, mode='w', newline='')
+            self.writer = csv.writer(self.file)
+            self.writer.writerow(["timestamp", "value"])
+            self.timer = time.time() + 60
+
         sync_value = str(self.sync_pulse.get_value())
-        if sync_value != self.old_value:
-            self.write_data(sync_value)
+        self.write_data(sync_value)
         time.sleep(1 / self.rate)
-        self.old_value = sync_value
+
+
+# class SyncRecorder(BaseRecorder):
+#     def __init__(self, path_manager, exp_dir, task_type):
+#         super().__init__(
+#             path_manager,
+#             exp_dir,
+#             task_type,
+#             file_name_suffix="sync_pulse_data",
+#             rate_key="2p_sync_rate",
+#         )
+#         self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
+#         self.sync_pulse = Sync_Pulse(self.sync_pin)
+#         self.old_value = 0
+#
+#     def record(self):
+#         sync_value = str(self.sync_pulse.get_value())
+#         if sync_value != self.old_value:
+#             self.write_data(sync_value)
+#         time.sleep(1 / self.rate)
+#         self.old_value = sync_value
 
 
 # class SyncRecorder(threading.Thread):
