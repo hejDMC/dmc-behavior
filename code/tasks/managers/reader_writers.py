@@ -58,11 +58,11 @@ class TriggerPulse(BaseRecorder):
         self.trigger_state = 1
         self.write_data(self.trigger_state)  # todo move one line down
         GPIO.output(self.trigger_pin, self.trigger_state)
-        time.sleep((1 / self.rate) / 2)
+        time.sleep(1 / (self.rate / 2))
         self.trigger_state = 0
         GPIO.output(self.trigger_pin, self.trigger_state)
         self.write_data(self.trigger_state)
-        time.sleep((1 / self.rate)/2)
+        time.sleep(1 / (self.rate / 2))
 
     def record(self):
         self.pull_trigger()
