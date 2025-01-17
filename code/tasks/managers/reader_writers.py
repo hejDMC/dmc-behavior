@@ -134,7 +134,7 @@ class SyncRecorder(BaseRecorder):
     def record(self):
         sync_value = str(self.sync_pulse.get_value())
         if sync_value != self.old_value:
-            self.sync_pulse_list.append([time.time(), 1])
+            self.sync_pulse_list.append([time.time(), sync_value])
             # self.write_data(sync_value)
         self.old_value = sync_value
         if self.stop:
