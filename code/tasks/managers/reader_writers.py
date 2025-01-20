@@ -58,7 +58,7 @@ class TriggerPulse(threading.Thread):
         self.pi = pigpio.pi()
         if not self.pi.connected:
             exit(1)
-        self.pi.set_PWM_frequency(self.trigger_pin, self.rate)
+        self.pi.set_PWM_frequency(self.trigger_pin, int(self.rate))
         self.pi.set_PWM_dutycycle(self.trigger_pin, 128)
         self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self._collect_timestamps)
 
