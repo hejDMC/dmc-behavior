@@ -70,7 +70,7 @@ class TriggerPulse(threading.Thread):
             pass
         self.writer.writerows(self.timestamps)
         self.file.close()
-        self.pi.set_mode(self.trigger_pin, pigpio.INPUT)
+        # self.pi.set_mode(self.trigger_pin, pigpio.INPUT)
         self.pi.stop()  # Clean up pigpio resources
 
 
