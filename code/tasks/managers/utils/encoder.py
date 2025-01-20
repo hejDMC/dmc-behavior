@@ -2,7 +2,7 @@
 # you can configure a callback which will be called whenever the value changes.
 # adapted from: https://github.com/nstansby/rpi-rotary-encoder-python
 
-import RPi.GPIO as GPIO
+import pigpio
 
 
 class Encoder:
@@ -14,18 +14,24 @@ class Encoder:
         self.state = "00"
         self.direction = None
         self.callback = callback
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.leftPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.rightPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.add_event_detect(self.leftPin, GPIO.BOTH, callback=self.transitionOccurred)
-        GPIO.add_event_detect(
-            self.rightPin, GPIO.BOTH, callback=self.transitionOccurred
-        )
+
+        self.pi = pigpio.pi()
+        if not self.pi.connected:
+            raise Exception("Could not connect to pigpio daemon.")
+
+        self.pi.set_mode(self.leftPin, pigpio.INPUT)
+        self.pi.set_pull_up_down(self.leftPin, pigpio.PUD_DOWN)
+        self.pi.set_mode(self.rightPin, pigpio.INPUT)
+        self.pi.set_pull_up_down(self.rightPin, pigpio.PUD_DOWN)
+
+        # Add callbacks for both pins
+        self.cb_left = self.pi.callback(self.leftPin, pigpio.EITHER_EDGE, self.transitionOccurred)
+        self.cb_right = self.pi.callback(self.rightPin, pigpio.EITHER_EDGE, self.transitionOccurred)
 
     def transitionOccurred(self, channel):
-        p1 = GPIO.input(self.leftPin)
-        p2 = GPIO.input(self.rightPin)
-        newState = "{}{}".format(p1, p2)
+        p1 = self.pi.read(self.leftPin)
+        p2 = self.pi.read(self.rightPin)
+        newState = f"{p1}{p2}"
 
         if self.state == "00":  # Resting position
             if newState == "01":  # Turned right 1
@@ -72,3 +78,9 @@ class Encoder:
 
     def getValue(self):
         return self.value
+
+    def cleanup(self):
+        # Cancel callbacks and stop pigpio instance
+        self.cb_left.cancel()
+        self.cb_right.cancel()
+        self.pi.stop()

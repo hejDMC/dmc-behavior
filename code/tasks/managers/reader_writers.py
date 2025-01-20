@@ -2,7 +2,6 @@ import threading
 import time
 import csv
 
-import RPi.GPIO as GPIO
 import pigpio
 from tasks.managers.data_io import DataIO
 from tasks.managers.utils.encoder import Encoder
@@ -91,13 +90,19 @@ class RotaryRecorder(BaseRecorder):
         )
         self.encoder_left = self.droid_settings["pin_map"]["IN"]["encoder_left_rec"]
         self.encoder_right = self.droid_settings["pin_map"]["IN"]["encoder_right_rec"]
-        self.encoder_data = Encoder(self.encoder_left, self.encoder_right)
-
+        self.encoder = Encoder(self.encoder_left, self.encoder_right)
+        self.encoder_list = []
     def record(self):
-        wheel_position = str(self.encoder_data.getValue())
+        wheel_position = str(self.encoder.getValue())
         self.write_data(wheel_position)
         time.sleep(1 / self.rate)
 
+    def run(self):
+        while not self.stop:
+            pass
+        self.writer.writerows(self.sync_pulse_list)
+        self.file.close()
+        self.pi.stop()  # Clean up pigpio resources
 #
 # class SyncRecorder(BaseRecorder):
 #     def __init__(self, path_manager, exp_dir, task_type):
