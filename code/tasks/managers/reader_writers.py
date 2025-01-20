@@ -3,6 +3,7 @@ import time
 import csv
 
 import RPi.GPIO as GPIO
+import pigpio
 from tasks.managers.data_io import DataIO
 from tasks.managers.utils.encoder import Encoder
 from tasks.managers.utils.sync_pulse import Sync_Pulse
@@ -39,33 +40,45 @@ class BaseRecorder(threading.Thread):
         raise NotImplementedError("Subclasses must implement the record method.")
 
 
-class TriggerPulse(BaseRecorder):
+class TriggerPulse(threading.Thread):
     def __init__(self, path_manager, exp_dir, task_type):
-        super().__init__(
-            path_manager,
-            exp_dir,
-            task_type,
-            file_name_suffix="camera_pulse_data",
-            rate_key="camera_trigger_rate",
-        )
+        super().__init__()
+        data_io = DataIO(path_manager, task_type)
+        self.droid_settings = data_io.load_droid_setting()
+        self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_camera_pulse_data.csv")
+        self.file = open(self.fn, mode='w', newline='')
+        self.writer = csv.writer(self.file)
+        self.writer.writerow(["timestamp", "value"])  # CSV header
+
         self.trigger_pin = self.droid_settings["pin_map"]["OUT"]["trigger_camera"]
+        self.rate = self.droid_settings["base_params"]["camera_trigger_rate"]
         self.trigger_state = 0
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.trigger_pin, GPIO.OUT)
+        self.timestamps = []
 
-    def pull_trigger(self):
-        self.trigger_state = 1
-        self.write_data(self.trigger_state)  # todo move one line down
-        GPIO.output(self.trigger_pin, self.trigger_state)
-        time.sleep(1 / (self.rate / 2))
-        self.trigger_state = 0
-        GPIO.output(self.trigger_pin, self.trigger_state)
-        self.write_data(self.trigger_state)
-        time.sleep(1 / (self.rate / 2))
+        self.pi = pigpio.pi()
+        if not self.pi.connected:
+            exit(1)
+        self.pi.set_PWM_frequency(self.trigger_pin, self.rate)
+        self.pi.set_PWM_dutycycle(self.trigger_pin, 128)
+        self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self._collect_timestamps)
 
-    def record(self):
-        self.pull_trigger()
+        self.stop = False
+
+    def run(self):
+
+        while not self.stop:
+            pass
+        self.writer.writerows(self.timestamps)
+        self.file.close()
+        # self.pi.set_mode(self.trigger_pin, pigpio.INPUT)
+        self.pi.stop()  # Clean up pigpio resources
+
+
+
+    def _collect_timestamps(self):
+        if not self.stop:
+            self.timestamps.append([time.time(), 1])
+
 
 
 class RotaryRecorder(BaseRecorder):
