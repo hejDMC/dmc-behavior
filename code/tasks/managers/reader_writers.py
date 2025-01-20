@@ -65,7 +65,6 @@ class TriggerPulse(threading.Thread):
         self.stop = False
 
     def run(self):
-
         while not self.stop:
             pass
         self.writer.writerows(self.timestamps)
@@ -158,32 +157,35 @@ class SyncRecorder(threading.Thread):
         super().__init__()
         data_io = DataIO(path_manager, task_type)
         self.droid_settings = data_io.load_droid_setting()
+        self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
+
         self.fn = exp_dir.joinpath(f"{path_manager.get_today()}_sync_pulse_data.csv")
-        self.running = False
         self.file = open(self.fn, mode='w', newline='')
         self.writer = csv.writer(self.file)
-        self.writer.writerow(["Timestamp", "PinState"])  # CSV header
-        self.sync_pulse_list = []
+        self.writer.writerow(["timestamp", "value"])  # CSV header
 
+        self.pi = pigpio.pi()
+        if not self.pi.connected:
+            exit(1)
+        self.pi.set_mode(self.sync_pin, pigpio.INPUT)
+        self.pi.set_pull_up_down(self.sync_pin, pigpio.PUD_DOWN)
+        self.pi.callback(self.sync_pin, pigpio.RISING_EDGE, self._collect_timestamps)
+
+        self.sync_pulse_list = []
         self.stop = False
 
-        self.sync_pin = self.droid_settings["pin_map"]["IN"]["microscope_sync"]
-        GPIO.setup(self.sync_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        # self.sync_pulse = Sync_Pulse(self.sync_pin, callback=self._transition_occurred)
-
     def run(self):
-        GPIO.add_event_detect(self.sync_pin, GPIO.RISING, callback=self._transition_occurred)
         while not self.stop:
             pass
         self.writer.writerows(self.sync_pulse_list)
-        GPIO.remove_event_detect(self.sync_pin)  # Remove event detection
         self.file.close()
+        self.pi.stop()  # Clean up pigpio resources
 
-    def _transition_occurred(self, pin):
+
+
+    def _collect_timestamps(self, _gpio, _level, _tick):
         if not self.stop:
             self.sync_pulse_list.append([time.time(), 1])
-            # self.writer.writerow([time.time(), 1])
-            # self.file.flush()  # Ensure data is written immediately
 
 
 # class SyncRecorder(threading.Thread):
