@@ -75,7 +75,7 @@ class TriggerPulse(threading.Thread):
 
 
 
-    def _collect_timestamps(self):
+    def _collect_timestamps(self, _gpio, _level, _tick):
         if not self.stop:
             self.timestamps.append([time.time(), 1])
 
