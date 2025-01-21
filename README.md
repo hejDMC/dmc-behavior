@@ -1,4 +1,4 @@
-<div align="right">
+<div align="center">
   <img src="docs/logo_dmc-behavior.png" alt="Project Logo" width="200">
 </div>
 
