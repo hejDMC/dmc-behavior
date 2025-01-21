@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="docs/logo_dmc-behavior.png" alt="Project Logo" width="200">
+</div>
+
+
 # *DMC-Behavior Platform* for auditory behavioral tasks in head-fixed mice
 ## Assembly of behavioral setups, software installation and operation
 ### Hardware assembly
