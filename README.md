@@ -1,5 +1,5 @@
-<div align="center">
-  <img src="docs/logo_dmc-behavior.png" alt="Project Logo" width="158.8">
+<div align="right">
+  <img src="docs/logo_dmc-behavior.png" alt="Project Logo" width="200">
 </div>
 
 
