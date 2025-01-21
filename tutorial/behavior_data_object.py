@@ -308,8 +308,8 @@ class SyncDataWrapper(TimeDataWrapper):
     def __init__(self, session_wrapper) -> None:
         super().__init__(session_wrapper, 'sync_pulse')
         if self.all is not None:
-            self.all = self.all[self.all['value'].diff() == 1]
-
+            # self.all = self.all[self.all['value'].diff() == 1]
+            self.all = self.all[self.all['value'] == 1]
 
 class CameraDataWrapper(TimeDataWrapper):
     def __init__(self, session_wrapper) -> None:
