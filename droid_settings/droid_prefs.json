@@ -1,0 +1,25 @@
+
+{
+    "pin_map": {
+        "IN": {
+            "encoder_left": 27,
+            "encoder_right": 22,
+            "licking_spout": "tba",
+            "microscope_sync": 5,
+            "encoder_left_rec": 10,
+            "encoder_right_rec": 9
+        },
+        "OUT": {
+            "pump": 16,
+            "trigger_camera": 6,
+            "opto": 26,
+            "led": "tba"
+        }
+    },
+    "base_params": {
+        "2p_sync_rate": 1000,
+        "camera_trigger_rate": 30,
+        "tone_sampling_rate": 44100,
+        "rotary_rate": 100
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "pre_reversal": {
+        "high": "no_response",
+        "low": "moved_wheel"
+    },
+    "post_reversal": {
+        "high": "moved_wheel",
+        "low": "no_response"
+    }
+}

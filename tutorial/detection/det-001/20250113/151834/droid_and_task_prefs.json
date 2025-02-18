@@ -1,0 +1,76 @@
+{
+    "droid_prefs": {
+        "pin_map": {
+            "IN": {
+                "encoder_left": 27,
+                "encoder_right": 22,
+                "licking_spout": "tba",
+                "microscope_sync": 23,
+                "encoder_left_rec": 10,
+                "encoder_right_rec": 9
+            },
+            "OUT": {
+                "pump": 16,
+                "trigger_camera": 6,
+                "opto": 26,
+                "led": "tba"
+            }
+        },
+        "base_params": {
+            "2p_sync_rate": 1000,
+            "camera_trigger_rate": 30,
+            "tone_sampling_rate": 44100,
+            "rotary_rate": 100
+        }
+    },
+    "task_prefs": {
+        "task_prefs": {
+            "low_octave": [
+                36,
+                39,
+                4
+            ],
+            "middle_octave": [
+                52,
+                55,
+                4
+            ],
+            "high_octave": [
+                68,
+                71,
+                4
+            ],
+            "tone_duration": 0.03,
+            "tone_fs": 100,
+            "cloud_duration": 0.51,
+            "tone_amplitude": 1,
+            "cloud_range": [
+                -32767,
+                32767
+            ],
+            "response_window": 2.04,
+            "punishment_sound": -1,
+            "punishment_sound_duration": 0.5,
+            "punishment_sound_amplitude": 1,
+            "quiet_window": [
+                1,
+                0.5
+            ],
+            "inter_trial_interval": [
+                0.5,
+                2.0
+            ],
+            "stim_strength": [
+                100
+            ],
+            "reward_size": [
+                5,
+                3
+            ]
+        },
+        "encoder_specs": {
+            "target_degrees": 30,
+            "quite_jitter": 2
+        }
+    }
+}

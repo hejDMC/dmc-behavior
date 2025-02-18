@@ -1,0 +1,25 @@
+{
+    "animal_id": "det-001",
+    "droid": "c3po",
+    "experimenter": "fj",
+    "procedure": "auditory_detection",
+    "date": "20250113",
+    "start": "15:18:32",
+    "end": "15:21:57",
+    "2p_sync_record": true,
+    "camera_data": true,
+    "# trials": 50,
+    "pump_duration": 0,
+    "ITI_range": [
+        0.5,
+        2.0
+    ],
+    "trial_statistics": [
+        40,
+        10,
+        0
+    ],
+    "ending_criteria": "manual",
+    "curr_stage": 0,
+    "stage_advance": false
+}

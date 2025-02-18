@@ -1,0 +1,25 @@
+ {
+  "task_prefs": {
+        "low_octave": [36, 47, 12],
+        "middle_octave": [48, 59, 12],
+        "high_octave": [60, 71, 12],
+        "tone_duration": 0.03,
+        "tone_fs": 100,
+        "cloud_duration": 0.51,
+        "tone_amplitude": 1,
+        "cloud_range": [-32767, 32767],
+        "response_window": 15,
+        "punishment_sound": -1,
+        "punishment_sound_duration": 0.5,
+        "punishment_sound_amplitude": 1,
+        "quiet_window": [1, 0.5],
+        "bias_counter_max": 50,
+        "inter_trial_interval": [0.5, 2.0],
+        "stim_strength": [100, 85, 70, 60],
+        "reward_size": [3, 1.5]
+  },
+  "encoder_specs": {
+    "target_degrees": 30,
+    "quite_jitter": 2
+  }
+}
