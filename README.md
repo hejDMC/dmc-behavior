@@ -16,7 +16,7 @@
 *see guide: `.docs/DMC-Behavior-Platform_Day-to-day-operation.md`*
 
 ## Citation
-If you use the DMC-Behavior Platform (`RRID:SCR_027433`) in your scientific work, please cite:
+If you use the DMC-Behavior Platform (`RRID:SCR_027434`) in your scientific work, please cite:
 ```
 Jung, F., Cao, X., Heymans, L., Carlén, M. (2025) "DMC-Behavior Platform: An Open-Source Framework for Auditory-Guided Perceptual Decision-Making in Head-Fixed Mice", eNeuro, https://doi.org/10.1523/ENEURO.0457-24.2025
 ```
